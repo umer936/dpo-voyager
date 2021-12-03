@@ -17,6 +17,7 @@
 
 import fetch from "@ff/browser/fetch";
 import Component, { Node } from "@ff/graph/Component";
+import CRenderer from "@ff/scene/components/CRenderer";
 
 import JSONReader from "../io/JSONReader";
 import ModelReader from "../io/ModelReader";
@@ -95,6 +96,9 @@ export default class CVAssetReader extends Component
 
     async getModel(assetPath: string): Promise<THREE.Object3D>
     {
+        // TODO: find a better place for this init 
+        this.modelLoader.initKTX2Loader(this.getSystemComponent(CRenderer).views[0].renderer);
+
         const url = this.assetManager.getAssetUrl(assetPath);
         return this.modelLoader.get(url);
     }

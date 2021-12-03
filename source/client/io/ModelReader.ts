@@ -16,16 +16,18 @@
  */
 
 //import resolvePathname from "resolve-pathname";
-import { LoadingManager, Object3D, Scene, Group, Mesh, MeshStandardMaterial, sRGBEncoding } from "three";
+import { LoadingManager, Object3D, Scene, Group, Mesh, MeshStandardMaterial, sRGBEncoding, WebGLRenderer } from "three";
 
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 
 import UberPBRMaterial from "../shaders/UberPBRMaterial";
 
 ////////////////////////////////////////////////////////////////////////////////
 
 const DEFAULT_DRACO_PATH = "https://www.gstatic.com/draco/versioned/decoders/1.3.6/";
+const DEFAULT_KTX2_PATH = "https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/";
 
 export default class ModelReader
 {
@@ -34,6 +36,8 @@ export default class ModelReader
 
     protected loadingManager: LoadingManager;
     protected gltfLoader;
+    protected ktx2Loader: KTX2Loader;
+    protected ktx2NeedsInit: boolean = true;
 
     protected customDracoPath = null;
 
@@ -58,15 +62,28 @@ export default class ModelReader
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath(this.customDracoPath || DEFAULT_DRACO_PATH);
 
+        this.ktx2Loader = new KTX2Loader();
+        this.ktx2Loader.setTranscoderPath(/*this.customKTX2Path ||*/ DEFAULT_KTX2_PATH);
+
         this.gltfLoader = new GLTFLoader(loadingManager);
         this.gltfLoader.setDRACOLoader(dracoLoader);
+        this.gltfLoader.setKTX2Loader(this.ktx2Loader);
     }
 
     dispose()
     {
         this.gltfLoader.dracoLoader.dispose();
         this.gltfLoader.setDRACOLoader(null);
+        this.ktx2Loader.dispose();
+        this.gltfLoader.setKTX2Loader(null);
         this.gltfLoader = null;
+    }
+
+    initKTX2Loader(renderer: WebGLRenderer) {
+        if(this.ktx2NeedsInit) {
+            this.ktx2Loader.detectSupport(renderer);
+            this.ktx2NeedsInit = false;
+        }
     }
 
     isValid(url: string): boolean
