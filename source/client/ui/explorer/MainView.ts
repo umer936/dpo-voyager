@@ -30,6 +30,7 @@ import ContentView from "./ContentView";
 import ChromeView from "./ChromeView";
 
 import styles from "./styles.scss";
+import { IAnnotation } from "client/schema/model";
 
 ////////////////////////////////////////////////////////////////////////////////
 // EXPLORER ICONS
@@ -247,6 +248,14 @@ export default class MainView extends CustomElement
         if(this.application) {
             const annotations = this.application.getAnnotations();
             return annotations;
+        }
+    }
+
+    addAnnotation(model: number, json: string)
+    {
+        if(this.application) {
+            const annotation : IAnnotation = JSON.parse(json);
+            this.application.addAnnotation(0, annotation);
         }
     }
 

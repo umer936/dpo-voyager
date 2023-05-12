@@ -41,7 +41,7 @@ import NVDocuments from "../nodes/NVDocuments";
 import NVTools from "../nodes/NVTools";
 
 import MainView from "../ui/explorer/MainView";
-import { EDerivativeQuality } from "client/schema/model";
+import { EDerivativeQuality, IAnnotation } from "client/schema/model";
 import CVARManager from "client/components/CVARManager";
 import { EUIElements } from "client/components/CVInterface";
 import { EBackgroundStyle } from "client/schema/setup";
@@ -49,8 +49,9 @@ import CRenderer from "client/../../libs/ff-scene/source/components/CRenderer";
 
 import { clamp } from "client/utils/Helpers"
 import CVScene from "client/components/CVScene";
-import CVAnnotationView from "client/components/CVAnnotationView";
+import CVAnnotationView, { Annotation } from "client/components/CVAnnotationView";
 import { ELanguageType } from "client/schema/common";
+import CVModel2 from "client/components/CVModel2";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -485,6 +486,25 @@ Version: ${ENV_VERSION}
         });
 
         return annotations;
+    }
+
+    // Appends an annotation to the model at modelIdx
+    addAnnotation(modelIdx: number, annotationJSON: IAnnotation) {
+        const annotation = new Annotation(annotationJSON);
+        const scene = this.system.getComponent(CVScene);
+        const views = scene.getGraphComponents(CVAnnotationView);
+        const view = views[modelIdx];
+        const model = view.getComponent(CVModel2)
+
+        const data = annotation.data;
+        data.position[0] += model.ins.position.value[0];
+        data.position[1] += model.ins.position.value[1];
+        data.position[2] += model.ins.position.value[2];
+        //data.direction = direction;
+
+        data.scale = 1 / model.outs.unitScale.value;
+
+        view.addAnnotation(annotation);
     }
 
     // Returns euler angles (yaw/pitch) for orbit navigation
