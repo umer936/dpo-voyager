@@ -165,7 +165,11 @@ export default class CVScene extends CVNode
         const box = this.outs.boundingBox.value;
         box.makeEmpty();
 
-        this.models.forEach(model => box.expandByObject(model.object3D));
+        this.models.forEach(model => {
+            if(model.object3D.visible){
+                box.expandByObject(model.object3D)
+            }
+        });
         box.getSize(_vec3);
 
         this.outs.boundingBox.set();
@@ -236,7 +240,7 @@ export default class CVScene extends CVNode
 
     protected updateCameras()
     {
-        if(this.renderer.views[0].renderer.xr.isPresenting) {
+        if(this.renderer.views[0] && this.renderer.views[0].renderer.xr.isPresenting) {
             return;
         }
 

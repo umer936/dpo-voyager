@@ -1,6 +1,6 @@
 /**
  * 3D Foundation Project
- * Copyright 2019 Smithsonian Institution
+ * Copyright 2023 Smithsonian Institution
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { MeshStandardMaterialParameters, MeshStandardMaterial, Vector3, Vector4, Color, 
-    Side, UniformsUtils, ShaderLib, NoBlending, DoubleSide, AdditiveBlending, FrontSide, Texture } from "three";
+import { Vector3, Vector4, Color, Side, UniformsUtils, ShaderLib, NoBlending, DoubleSide, 
+    AdditiveBlending, FrontSide, Texture, MeshPhysicalMaterial, MeshPhysicalMaterialParameters } from "three";
 
 const fragmentShader = require("./uberPBRShader.frag").default;
 const vertexShader = require("./uberPBRShader.vert").default;
@@ -27,12 +27,12 @@ import { EShaderMode } from "client/schema/setup";
 
 export { EShaderMode };
 
-export interface IUberPBRShaderProps extends MeshStandardMaterialParameters
+export interface IUberPBRAdvShaderProps extends MeshPhysicalMaterialParameters
 {
 
 }
 
-export default class UberPBRMaterial extends MeshStandardMaterial
+export default class UberPBRMaterial extends MeshPhysicalMaterial
 {
     isUberPBRMaterial: boolean;
     isMeshStandardMaterial: boolean;
@@ -60,7 +60,7 @@ export default class UberPBRMaterial extends MeshStandardMaterial
     private _cutPlaneColor: Vector3;
     private _zoneMap: Texture;
 
-    constructor(params?: IUberPBRShaderProps)
+    constructor(params?: IUberPBRAdvShaderProps)
     {
         super();
 
@@ -68,11 +68,11 @@ export default class UberPBRMaterial extends MeshStandardMaterial
 
         this.isUberPBRMaterial = true;
         this.isMeshStandardMaterial = true;
-        this.isMeshPhysicalMaterial = false;
+        this.isMeshPhysicalMaterial = true;
 
         this.defines = {
             "STANDARD": true,
-            "PHYSICAL": false,
+            "PHYSICAL": true,
             "OBJECTSPACE_NORMALMAP": false,
             "MODE_NORMALS": false,
             "MODE_XRAY": false,
@@ -81,7 +81,7 @@ export default class UberPBRMaterial extends MeshStandardMaterial
         };
 
         this.uniforms = UniformsUtils.merge([
-            ShaderLib.standard.uniforms,
+            ShaderLib.physical.uniforms,
             {
                 aoMapMix: { value: new Vector3(0.25, 0.25, 0.25) },
                 cutPlaneDirection: { value: new Vector4(0, 0, -1, 0) },

@@ -217,6 +217,8 @@ export default class ArticleEditor extends SystemView
             content_style: [contentCss, contentUiCss].join('\n'),
             convert_urls: false,
             image_caption: true,
+            link_default_target: '_blank',
+            //link_target_list: false,
 
             images_upload_handler: (file, progress) => new Promise((resolve, reject) => {
                 const filename = file.filename();
@@ -257,6 +259,16 @@ export default class ArticleEditor extends SystemView
                         this.closeArticle();
                     }
                 });
+
+                /*editor.on('init', function(args) {
+                    editor = args.target;
+            
+                    editor.on('NodeChange', function(e) {
+                        if (e && e.element.nodeName.toLowerCase() == 'img') {
+                            tinymce.DOM.setAttribs(e.element, {'height': "100%", 'max-width': "100%"});
+                        }
+                    });
+                });*/
             },
         });       
     }

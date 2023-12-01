@@ -16,7 +16,8 @@
  */
 
 //import resolvePathname from "resolve-pathname";
-import { LoadingManager, Object3D, Scene, Group, Mesh, MeshStandardMaterial, sRGBEncoding } from "three";
+import UberPBRAdvMaterial from "client/shaders/UberPBRAdvMaterial";
+import { LoadingManager, Object3D, Scene, Group, Mesh, MeshStandardMaterial, sRGBEncoding, SRGBColorSpace, MeshPhysicalMaterial } from "three";
 
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -25,7 +26,7 @@ import UberPBRMaterial from "../shaders/UberPBRMaterial";
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const DEFAULT_DRACO_PATH = "https://www.gstatic.com/draco/versioned/decoders/1.3.6/";
+const DEFAULT_DRACO_PATH = "https://www.gstatic.com/draco/versioned/decoders/1.5.6/";
 
 export default class ModelReader
 {
@@ -110,15 +111,15 @@ export default class ModelReader
                 const material = mesh.material as MeshStandardMaterial;
 
                 if (material.map) {
-                   material.map.encoding = sRGBEncoding;
+                   material.map.colorSpace = SRGBColorSpace;
                 }
 
                 mesh.geometry.computeBoundingBox();
 
-                const uberMat = new UberPBRMaterial();
+                const uberMat = material.type === "MeshPhysicalMaterial" ? new UberPBRAdvMaterial() : new UberPBRMaterial();
 
                 // copy properties from previous material
-                if (material.type === "MeshStandardMaterial") {
+                if (material.type === "MeshPhysicalMaterial" || material.type === "MeshStandardMaterial") {
                     uberMat.copy(material);
                 }
 

@@ -25,7 +25,9 @@ import CVDocument from "../../components/CVDocument";
 
 import SceneView from "../SceneView";
 import "../Spinner";
+import "./ActionPrompt"
 import "./ReaderView";
+import "./CaptionView"
 
 import DocumentView, { customElement, html } from "./DocumentView";
 import CRenderer from "client/../../libs/ff-scene/source/components/CRenderer";
@@ -34,6 +36,7 @@ import ARPrompt from "./ARPrompt";
 import ARMenu from "./ARMenu";
 import CVARManager from "client/components/CVARManager";
 import CVAssetReader from "client/components/CVAssetReader";
+import CaptionView from "./CaptionView";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,6 +44,7 @@ import CVAssetReader from "client/components/CVAssetReader";
 export default class ContentView extends DocumentView
 {
     protected sceneView: SceneView = null;
+    protected captionView: CaptionView = null;
     protected documentProps = new Subscriber("value", this.onUpdate, this);
     protected isMobile: boolean = null;
     protected assetPath: string = "";
@@ -57,6 +61,9 @@ export default class ContentView extends DocumentView
     protected get tours() {
         return this.activeDocument ? this.activeDocument.setup.tours : null;
     }
+    protected get navigation() {
+        return this.activeDocument ? this.activeDocument.setup.navigation : null;
+    }
     protected get renderer() {
         return this.system.getMainComponent(CRenderer);
     }
@@ -71,6 +78,8 @@ export default class ContentView extends DocumentView
     {
         this.classList.add("sv-content-view");
         this.sceneView = new SceneView(this.system);
+
+        this.captionView = new CaptionView(this.system);
 
         this.isMobile = this.mobileCheck();
     }
@@ -97,9 +106,11 @@ export default class ContentView extends DocumentView
         let readerVisible = false;
         let readerPosition = EReaderPosition.Overlay;
         let tourMenuVisible = false;
+        let promptVisible = false;
 
         const reader = this.reader;
         const tours = this.tours;
+        const navigation = this.navigation;
 
         // TODO - Hack, figure out a better place for this.
         const overlayElement = this.arManager.shadowRoot.querySelector('ff-viewport-overlay');
@@ -124,16 +135,20 @@ export default class ContentView extends DocumentView
             if(this.isMobile === true) {
                 readerPosition = EReaderPosition.Overlay;
             }
+        }
+        if(navigation) {
+            const controls = navigation.ins.pointerEnabled.value;
+            const promptEnabled = navigation.ins.promptEnabled.value;
 
-            /*if(document.documentElement.clientWidth < 1200) {
-                readerPosition = EReaderPosition.Overlay;
+            if(controls && promptEnabled) {
+                const isInUse = navigation.ins.isInUse.value;
+                promptVisible = !isLoading && isInitialLoad && !isInUse && !readerVisible;
+                navigation.ins.promptActive.setValue(promptVisible);
             }
-            else {
-                readerPosition = EReaderPosition.Right;
-            }*/
         }
 
         const sceneView = this.sceneView;
+        const captionView = this.captionView;
 
         const blurContent =
             (readerVisible && readerPosition === EReaderPosition.Overlay) || tourMenuVisible;
@@ -149,7 +164,7 @@ export default class ContentView extends DocumentView
 
         if(!isLoading && isInitialLoad) { 
             // send load timer event
-            this.analytics.sendProperty("Loading.Time", this.analytics.getTimerTime()/1000);
+            this.analytics.sendProperty("Loading_Time", this.analytics.getTimerTime()/1000);
             this.analytics.resetTimer();
 
             this.assetManager.initialLoad = false;
@@ -168,19 +183,24 @@ export default class ContentView extends DocumentView
                             </div>
                         </div>
                     </div>
-                    <sv-spinner ?visible=${isLoading}></sv-spinner>`;
+                    <sv-spinner ?visible=${isLoading} .assetPath=${this.assetPath}></sv-spinner>
+                    ${captionView}`;
             }
             if (readerPosition === EReaderPosition.Overlay) {
                 return html`<div class="ff-fullsize sv-content-stack">${sceneView}
                     <div class="sv-reader-container">
                         <sv-reader-view .system=${system} @close=${this.onReaderClose}></sv-reader-view>
                     </div>
-                    <sv-spinner ?visible=${isLoading}></sv-spinner></div>`;
+                    <sv-spinner ?visible=${isLoading} .assetPath=${this.assetPath}></sv-spinner>
+                    ${captionView}
+                    </div>`;
             }
         }
 
         return html`<div class="ff-fullsize sv-content-only">${sceneView}</div>
-            <sv-spinner ?visible=${isLoading} .assetPath=${this.assetPath}></sv-spinner>`;
+            <sv-spinner ?visible=${isLoading} .assetPath=${this.assetPath}></sv-spinner>
+            ${captionView}
+            ${promptVisible ? html`<sv-action-prompt></sv-action-prompt>` : null}`;
     }
 
     protected onReaderClose()
@@ -199,6 +219,7 @@ export default class ContentView extends DocumentView
                 next.setup.reader.ins.position,
                 next.setup.reader.ins.enabled,
                 next.setup.tours.outs.tourIndex,
+                next.setup.navigation.ins.isInUse
             );
         }
 

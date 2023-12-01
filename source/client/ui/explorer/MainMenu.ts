@@ -126,29 +126,33 @@ export default class MainMenu extends DocumentView
 
         const narrationButtonVisible = setup.audio.outs.narrationEnabled.value;
         const narrationActive = setup.audio.outs.narrationPlaying.value;
+        const narrationDisabled = setup.audio.outs.isPlaying.value && !setup.audio.outs.narrationPlaying.value;
 
         const language = setup.language;
 
         // TODO - push to ARManager?
         const models = scene.getGraphComponents(CVModel2);
-        const ARderivatives = models[0] ? models[0].derivatives.getByQuality(EDerivativeQuality.AR) : [];
-        const arButtonVisible = this.arManager.outs.available.value && ARderivatives.length > 0 && models.length >= 1;
+        let hasARderivatives = false;
+        models.forEach(model => {
+            hasARderivatives = model.derivatives.getByQuality(EDerivativeQuality.AR).length > 0 ? true : hasARderivatives;
+        });
+        const arButtonVisible = this.arManager.outs.available.value && hasARderivatives && models.length >= 1;
 
 
         return html`
-            ${arButtonVisible ? html`<ff-button icon="ar" title=${language.getLocalizedString("Enter AR View")}
+            ${arButtonVisible ? html`<ff-button icon="ar" id="ar-btn" title=${language.getLocalizedString("Enter AR View")}
                 @click=${this.onEnterAR}></ff-button>` : null}
-            ${narrationButtonVisible ? html`<ff-button icon="audio" title=${language.getLocalizedString("Play Audio Narration")}
-                ?selected=${narrationActive} @click=${this.onToggleNarration}></ff-button>` : null}
+            ${narrationButtonVisible ? html`<ff-button icon="audio" id="audio-btn" title=${language.getLocalizedString("Play Audio Narration")}
+                ?selected=${narrationActive} ?disabled=${narrationDisabled} @click=${this.onToggleNarration}></ff-button>` : null}
             ${tourButtonVisible ? html`<ff-button id="tour-btn" icon="globe" title=${language.getLocalizedString("Interactive Tours")}
                 ?selected=${toursActive} @click=${this.onToggleTours}></ff-button>` : null}
             ${readerButtonVisible ? html`<ff-button id="reader-btn" icon="article" title=${language.getLocalizedString("Read Articles")}
                 ?selected=${readerActive} ?disabled=${modeButtonsDisabled} @click=${this.onToggleReader}></ff-button>` : null}
-            ${annotationsButtonVisible ? html`<ff-button aria-pressed=${annotationsActive} icon="comment" title=${language.getLocalizedString("Show/Hide Annotations")}
+            ${annotationsButtonVisible ? html`<ff-button aria-pressed=${annotationsActive} id="anno-btn" icon="comment" title=${language.getLocalizedString("Show/Hide Annotations")}
                 ?selected=${annotationsActive} ?disabled=${modeButtonsDisabled} @click=${this.onToggleAnnotations}></ff-button>` : null}
             <ff-button icon="share" id="share-btn" title=${language.getLocalizedString("Share Experience")}
                 ?selected=${this.shareButtonSelected} @click=${this.onToggleShare}></ff-button>    
-            ${fullscreenButtonVisible ? html`<ff-button aria-pressed=${fullscreenActive} icon="expand" title=${language.getLocalizedString("Fullscreen")}
+            ${fullscreenButtonVisible ? html`<ff-button id="fullscreen-btn" aria-pressed=${fullscreenActive} icon="expand" title=${language.getLocalizedString("Fullscreen")}
                 ?selected=${fullscreenActive} @click=${this.onToggleFullscreen}></ff-button>` : null}
             ${toolButtonVisible ? html`<ff-button id="tools-btn" icon="tools" title=${language.getLocalizedString("Tools and Settings")}
                 ?selected=${toolsActive} ?disabled=${modeButtonsDisabled} @click=${this.onToggleTools}></ff-button>` : null}`;
@@ -165,7 +169,7 @@ export default class MainMenu extends DocumentView
             readerIns.articleId.setValue(reader.articles.length === 1 ? reader.articles[0].article.id : "");
         }
 
-        this.analytics.sendProperty("Reader.Enabled", readerIns.enabled.value);
+        this.analytics.sendProperty("Reader_Enabled", readerIns.enabled.value);
     }
 
     protected onToggleTours()
@@ -185,7 +189,7 @@ export default class MainMenu extends DocumentView
             tourIns.tourIndex.setValue(-1); // show tour menu
         }
 
-        this.analytics.sendProperty("Tours.Enabled", tourIns.enabled.value);
+        this.analytics.sendProperty("Tours_Enabled", tourIns.enabled.value);
     }
 
     protected onToggleAnnotations()
@@ -198,7 +202,7 @@ export default class MainMenu extends DocumentView
         }
 
         viewerIns.annotationsVisible.setValue(!viewerIns.annotationsVisible.value);
-        this.analytics.sendProperty("Annotations.Visible", viewerIns.annotationsVisible.value);
+        this.analytics.sendProperty("Annotations_Visible", viewerIns.annotationsVisible.value);
     }
 
     protected onToggleShare()
@@ -213,14 +217,14 @@ export default class MainMenu extends DocumentView
                 this.setElementFocus("share-btn");
             });
 
-            this.analytics.sendProperty("Menu.Share");
+            this.analytics.sendProperty("Menu_Share");
         }
     }
 
     protected onToggleFullscreen()
     {
         this.fullscreen.toggle();
-        this.analytics.sendProperty("Menu.Fullscreen");
+        this.analytics.sendProperty("Menu_Fullscreen");
     }
 
     protected onToggleTools()
@@ -233,7 +237,7 @@ export default class MainMenu extends DocumentView
         }
 
         toolIns.visible.setValue(!toolIns.visible.value);
-        this.analytics.sendProperty("Tools.Visible", toolIns.visible.value);
+        this.analytics.sendProperty("Tools_Visible", toolIns.visible.value);
     }
 
     protected onEnterAR()

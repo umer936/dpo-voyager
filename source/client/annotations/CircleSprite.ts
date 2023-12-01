@@ -17,7 +17,7 @@
 
 import { Camera, ArrayCamera, PerspectiveCamera, Vector3, Quaternion, Matrix4, Group, 
     Mesh, RingGeometry, MeshBasicMaterial, BufferGeometry, RawShaderMaterial, 
-    GreaterDepth, CircleGeometry, MathUtils } from "three";
+    GreaterDepth, CircleGeometry, MathUtils, GLSL3 } from "three";
 import * as createTextGeometry from "three-bmfont-text";
 import * as createTextShader from "three-bmfont-text/shaders/msdf";
 
@@ -98,6 +98,9 @@ export default class CircleSprite extends AnnotationSprite
             this.ringMaterialB,
         );
 
+        this.ringMaterialA.toneMapped = false;
+        this.ringMaterialB.toneMapped = false;
+
         const innerCircle = new Mesh(
             new CircleGeometry(0.45, 32),
             new MeshBasicMaterial({ color: 0, opacity: 0.65, transparent: true }),
@@ -124,7 +127,8 @@ export default class CircleSprite extends AnnotationSprite
                 map: font.texture,
                 transparent: true,
                 color: 0xffffff,
-                isWebGL2: this.isWebGL2
+                isWebGL2: this.isWebGL2,
+                glslVersion: GLSL3,
             }));
 
             this.markerMaterialB = new RawShaderMaterial(createTextShader.default({
@@ -134,7 +138,8 @@ export default class CircleSprite extends AnnotationSprite
                 color: 0xffffff,
                 depthFunc: GreaterDepth,
                 depthWrite: false,
-                isWebGL2: this.isWebGL2
+                isWebGL2: this.isWebGL2,
+                glslVersion: GLSL3,
             }));
 
             this.markerGeometry = createTextGeometry.default({ font: font.descriptor });
@@ -335,13 +340,39 @@ class CircleAnnotation extends AnnotationElement
         const annotationData = annotation.data;
 
         return html`<div class="sv-title">${annotation.title}</div>
+            ${annotationData.imageUri ? html`<div><img src="${this.sprite.assetManager.getAssetUrl(annotationData.imageUri)}"></div>` : null}
             <div class="sv-content"><p>${unsafeHTML(annotation.lead)}</p></div>
+            ${annotationData.audioId ? html`<div id="audio_container" @pointerdown=${this.onClickAudio}></div>` : null}
             ${annotationData.articleId ? html`<ff-button inline text="Read more..." icon="document" @click=${this.onClickArticle}></ff-button>` : null}`;
+    }
+
+    protected updated(changedProperties): void {
+        super.updated(changedProperties);
+
+        const annotation = this.sprite.annotation;
+        const annotationData = annotation.data;
+
+        const audioView = this.querySelector(".sv-audio-view");
+        if(annotationData.audioId) {
+            if(annotationData.expanded && !audioView) {
+                const audioContainer = this.querySelector("#audio_container");
+                audioContainer.append(this.sprite.audioManager.getPlayerById(annotationData.audioId));
+            }
+            else if(!annotationData.expanded && audioView) {
+                this.sprite.audioManager.stop();
+            }
+        }
     }
 
     protected onClickArticle(event: MouseEvent)
     {
         event.stopPropagation();
         this.sprite.emitLinkEvent(this.sprite.annotation.data.articleId);
+    }
+
+    protected onClickAudio(event: MouseEvent)
+    {
+        event.stopPropagation();
+        this.sprite.emitClickEvent();
     }
 }
