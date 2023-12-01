@@ -50,8 +50,10 @@ import CRenderer from "client/../../libs/ff-scene/source/components/CRenderer";
 import { clamp } from "client/utils/Helpers"
 import CVScene from "client/components/CVScene";
 import CVAnnotationView, { Annotation } from "client/components/CVAnnotationView";
-import { ELanguageType } from "client/schema/common";
+import { ELanguageType, EUnitType } from "client/schema/common";
 import CVModel2 from "client/components/CVModel2";
+import CTransform from "client/../../libs/ff-scene/source/components/CTransform";
+import CScene from "client/../../libs/ff-scene/source/components/CScene";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -238,8 +240,13 @@ Version: ${ENV_VERSION}
 
         return this.assetReader.getJSON(documentPath)
             .then(data => {
-                merge = merge === undefined ? !data.lights && !data.cameras : merge;
-                return this.documentProvider.amendDocument(data, documentPath, merge);
+                if(data.type && data.type == "Manifest") {
+                    this.loadIIIFManifest(data);
+                }
+                else {
+                    merge = merge === undefined ? !data.lights && !data.cameras : merge;
+                    return this.documentProvider.amendDocument(data, documentPath, merge);
+                }
             })
             .then(document => {
                 if (isFinite(dq)) {
@@ -740,6 +747,82 @@ Version: ${ENV_VERSION}
             output = false;
         }
         return output;
+    }
+
+    // load IIIF manifest
+    protected loadIIIFManifest(data: any)
+    {
+        console.log("LOADING IIIF MANIFEST");
+        const activeDoc = this.documentProvider.activeComponent;
+
+        const scenes = data.items.filter(elem => elem.type == "Scene");
+        scenes.forEach(scene => {
+            const annoPages = scene.items.filter(elem => elem.type == "AnnotationPage");
+            annoPages.forEach(page => {
+                const annotations = page.items.filter(elem => elem.type == "Annotation");
+                annotations.forEach(annotation => {
+                    const modelSources = annotation.body.source.filter(elem => elem.type == "Model");
+                    modelSources.forEach(model => {
+                        const newModel = activeDoc.appendModel(model.id);
+                        const nodeTransform = newModel.transform;
+                        newModel.ins.localUnits.setValue(EUnitType.m);
+                        
+                        // look for translation
+                        const translation = annotation.target.map((elem) => {
+                            const selector = elem.selector.filter(e => e.type == "PointSelector");
+                            if(selector.length > 0) {
+                                return selector[0];
+                            }
+                        });
+
+                        // add translation
+                        if(translation.length > 0) {
+                            const x = parseFloat(translation[0].x);
+                            const y = parseFloat(translation[0].y);
+                            const z = parseFloat(translation[0].z)
+                            nodeTransform.ins.position.setValue([x,y,z]);
+                        }
+
+                        // add scale/rotation
+                        if(annotation.body.hasOwnProperty("transforms")) {
+                            annotation.body.transforms.forEach(transform => {
+
+                                const x = parseFloat(transform.x);
+                                const y = parseFloat(transform.y);
+                                const z = parseFloat(transform.z)
+
+                                if(transform.type == "ScaleTransform") {  
+                                    nodeTransform.ins.scale.setValue([x,y,z]);
+                                }
+                                else if(transform.type == "RotationTransform") {
+                                    nodeTransform.ins.rotation.setValue([x,y,z]);
+                                }
+                            });
+                        }
+                    });
+
+                    const cameraSources = annotation.body.source.filter(elem => elem.type == "Camera");
+                    // only handle one camera for now
+                    if(cameraSources.length > 0) {
+                        // disable autozoom
+                        activeDoc.setup.navigation.ins.autoZoom.setValue(false);
+
+                        // look for translation
+                        const translation = annotation.target.map((elem) => {
+                            const selector = elem.selector.filter(e => e.type == "PointSelector");
+                            if(selector.length > 0) {
+                                return selector[0];
+                            }
+                        });
+
+                        // add translation
+                        if(translation.length > 0) {
+                            this.setCameraOffset(translation[0].x, translation[0].y, translation[0].z);
+                        }
+                    }
+                });
+            });
+        });
     }
 }
 
