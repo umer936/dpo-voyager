@@ -757,14 +757,16 @@ Version: ${ENV_VERSION}
             annoPages.forEach(page => {
                 const annotations = page.items.filter(elem => elem.type == "Annotation");
                 annotations.forEach(annotation => {
-                    const modelSources = annotation.body.source.filter(elem => elem.type == "Model");
-                    modelSources.forEach(model => {
+                    //const modelSources = annotation.body.source.filter(elem => elem.type == "Model");
+                    //modelSources.forEach(model => {console.log("D");
+                    if(annotation.body.type == "Model") {
+                        const model = annotation.body;
                         const newModel = activeDoc.appendModel(model.id);
                         const nodeTransform = newModel.transform;
                         newModel.ins.localUnits.setValue(EUnitType.m);
                         
                         // look for translation
-                        const translation = annotation.target.map((elem) => {
+                        /*const translation = annotation.target.map((elem) => {
                             const selector = elem.selector.filter(e => e.type == "PointSelector");
                             if(selector.length > 0) {
                                 return selector[0];
@@ -794,10 +796,11 @@ Version: ${ENV_VERSION}
                                     nodeTransform.ins.rotation.setValue([x,y,z]);
                                 }
                             });
-                        }
-                    });
+                        }*/
+                    //});
+                    }
 
-                    const cameraSources = annotation.body.source.filter(elem => elem.type == "Camera");
+                    /*const cameraSources = annotation.body.source.filter(elem => elem.type == "Camera");
                     // only handle one camera for now
                     if(cameraSources.length > 0) {
                         // disable autozoom
@@ -815,7 +818,7 @@ Version: ${ENV_VERSION}
                         if(translation.length > 0) {
                             this.setCameraOffset(translation[0].x, translation[0].y, translation[0].z);
                         }
-                    }
+                    }*/
                 });
             });
         });
