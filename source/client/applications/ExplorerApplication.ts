@@ -753,6 +753,15 @@ Version: ${ENV_VERSION}
 
         const scenes = data.items.filter(elem => elem.type == "Scene");
         scenes.forEach(scene => {
+            const bgColor = scene.backgroundColor;
+            this.setBackgroundStyle("solid");
+            if(bgColor) {
+                this.setBackgroundColor(bgColor);
+            }
+            else {
+                this.setBackgroundColor("#000000");
+            }
+
             const annoPages = scene.items.filter(elem => elem.type == "AnnotationPage");
             annoPages.forEach(page => {
                 const annotations = page.items.filter(elem => elem.type == "Annotation");
@@ -763,7 +772,7 @@ Version: ${ENV_VERSION}
                         const model = annotation.body;
                         const newModel = activeDoc.appendModel(model.id);
                         const nodeTransform = newModel.transform;
-                        newModel.ins.localUnits.setValue(EUnitType.m);
+                        //newModel.ins.localUnits.setValue(EUnitType.mm);
                         
                         // look for translation
                         /*const translation = annotation.target.map((elem) => {
