@@ -45,6 +45,8 @@ import { ELanguageType, EUnitType } from "client/schema/common";
 import CVAssetReader from "./CVAssetReader";
 import CVAudioManager from "./CVAudioManager";
 import CVAssetManager from "./CVAssetManager";
+import CVSnapshots from "./CVSnapshots";
+import CPulse from "client/../../libs/ff-graph/source/components/CPulse";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -91,6 +93,9 @@ export default class CVAnnotationView extends CObject3D
     private _viewports = new Set<Viewport>();
     private _sprites: Dictionary<HTMLSprite> = {};
 
+    private _truncateLock = false;
+    private _activeView = false;
+
     protected get model() {
         return this.getComponent(CVModel2);
     }
@@ -105,6 +110,9 @@ export default class CVAnnotationView extends CObject3D
     }
     protected get audio() {
         return this.getGraphComponent(CVAudioManager, true);
+    }
+    protected get snapshots() {
+        return this.getGraphComponent(CVSnapshots, true);
     }
     protected get articles() {
         const meta = this.meta;
@@ -140,6 +148,12 @@ export default class CVAnnotationView extends CObject3D
             if (annotation) {
                 annotation.set("expanded", true);
                 this.updateSprite(annotation);
+
+                // need to lock truncation checking during a tween
+                if(this._activeView) {
+                    this._truncateLock = true;
+                    this._activeView = false;
+                }
             }
 
             const ins = this.ins;
@@ -154,13 +168,13 @@ export default class CVAnnotationView extends CObject3D
             ins.azimuth.setValue(annotation ? annotation.data.azimuth : 0, true);
             ins.color.setValue(annotation ? annotation.data.color.slice() : [ 1, 1, 1 ], true);
 
-            const articles = this.articles;
-            if (articles) {
-                const names = articles.items.map(article => article.title);
+            const articles = this.reader.articles;
+            if (articles.length) {
+                const names = articles.map(entry => entry.article.title);
                 names.unshift("(none)");
                 ins.article.setOptions(names);
-                const article = annotation ? articles.getById(annotation.data.articleId) : null;
-                ins.article.setValue(article ? articles.getIndexOf(article) + 1 : 0, true);
+                const article = annotation ? articles.find((entry) => entry.article.id === annotation.data.articleId) : null;
+                ins.article.setValue(article ? articles.indexOf(article) + 1 : 0, true);
             }
             else {
                 ins.article.setOptions([ "(none)" ]);
@@ -174,6 +188,7 @@ export default class CVAnnotationView extends CObject3D
 
             this.emit<IAnnotationsUpdateEvent>({ type: "annotation-update", annotation });
         }
+
     }
 
     get hasAnnotations() {
@@ -277,9 +292,9 @@ export default class CVAnnotationView extends CObject3D
                 annotation.imageAltText =  ins.imageAltText.value;
             }
             if (ins.article.changed) {
-                const articles = this.articles;
-                const article = articles && articles.getAt(ins.article.getValidatedValue() - 1);
-                annotation.set("articleId", article ? article.id : "");
+                const articles = this.reader.articles;
+                const entry = articles && articles[ins.article.getValidatedValue() - 1];
+                annotation.set("articleId", entry ? entry.article.id : "");
             }
             if (ins.audioId.changed) {
                 annotation.set("audioId", ins.audioId.value);
@@ -310,6 +325,16 @@ export default class CVAnnotationView extends CObject3D
 
         const spriteGroup = this.object3D as HTMLSpriteGroup;
         spriteGroup.render(viewport.overlay, context.camera);
+
+        // Handle locking truncation for view animation only after 
+        // the sprite has a chance to do an initial update.
+        if(this._truncateLock) {
+            const annotation = this.activeAnnotation.data;
+            const sprite = this._sprites[annotation.id] as AnnotationSprite;
+            sprite.isAnimating = true;
+            this.snapshots.outs.tweening.once("value", () => { sprite.isAnimating = false; }, this);
+            this._truncateLock = false;
+        }
     }
 
     dispose()
@@ -467,6 +492,23 @@ export default class CVAnnotationView extends CObject3D
     protected onSpriteClick(event: any)
     {
         this.emit(event);
+
+        // start view animation if it exists
+        const annotation = event.annotation;
+        if(annotation && annotation.data.viewId.length && !this.arManager.outs.isPresenting.value) {
+            this.normalizeViewOrbit(annotation.data.viewId);
+
+            // If activeAnnotation is being tracked, make sure it is set
+            const activeIdx = this.snapshots.getTargetProperties().findIndex(prop => prop.name == "ActiveId");
+            if(activeIdx >= 0) {
+                const viewState = this.snapshots.getState(annotation.data.viewId);
+                viewState.values[activeIdx] = annotation.data.id;
+            }
+            
+            const pulse = this.getMainComponent(CPulse);
+            this.snapshots.tweenTo(annotation.data.viewId, pulse.context.secondsElapsed);
+            this._activeView = true;
+        }
     }
 
     protected onSpriteLink(event: any)
@@ -521,6 +563,11 @@ export default class CVAnnotationView extends CObject3D
 
     protected updateLanguage()
     {
+        // only update language for model annotations
+        if(!this.getComponent(CVModel2, true)) {
+            return;
+        }
+
         const ins = this.ins;
         const annotation = this._activeAnnotation;
         const language = this.language;
@@ -545,5 +592,24 @@ export default class CVAnnotationView extends CObject3D
         ins.tags.setValue(annotation ? annotation.tags.join(", ") : "");
         ins.imageCredit.setValue(annotation ? annotation.imageCredit : "", true);
         ins.imageAltText.setValue(annotation ? annotation.imageAltText : "", true);
+
+        // update article list
+        const names = this.reader.articles.map(entry => entry.article.title);
+        names.unshift("(none)");
+        ins.article.setOptions(names);
+    }
+
+    // helper function to bring saved state orbit into alignment with current view orbit
+    protected normalizeViewOrbit(viewId: string) {
+        const orbitIdx = this.snapshots.getTargetProperties().findIndex(prop => prop.name == "Orbit");
+        const viewState = this.snapshots.getState(viewId);
+        const currentOrbit = this.snapshots.getCurrentValues()[orbitIdx];
+        let angleOffset = 0;
+        currentOrbit.forEach((n, i) => {
+            const mult = Math.round((n-viewState.values[orbitIdx][i])/360);
+            viewState.values[orbitIdx][i] += 360*mult;
+            angleOffset += Math.abs(n-viewState.values[orbitIdx][i]);
+        });
+        viewState.duration = angleOffset > 0.01 ? 1.0 : 0;  // don't animate if we are already there
     }
 }

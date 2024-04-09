@@ -23,6 +23,7 @@ import SystemView, { customElement } from "@ff/scene/ui/SystemView";
 import QuadSplitter, { EQuadViewLayout, IQuadSplitterChangeMessage } from "@ff/ui/QuadSplitter";
 import CVDocumentProvider from "client/components/CVDocumentProvider";
 import CVOrbitNavigation, { EKeyNavMode } from "client/components/CVOrbitNavigation";
+import CVSetup from "client/components/CVSetup";
 import CVTape from "client/components/CVTape";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +86,7 @@ export default class SceneView extends SystemView
         this.setAttribute("touch-action", "none"); 
 
         this.tabIndex = 0;
+        this.id = "sv-scene"
         this.ariaLabel = "Interactive 3D Model. Use mouse, touch, or arrow keys to rotate.";
         this.setAttribute("role", "application"),
 
@@ -139,14 +141,14 @@ export default class SceneView extends SystemView
         
         this.system.getMainComponent(CVDocumentProvider).activeComponent.setup.navigation.ins.pointerEnabled.on("value", this.enablePointerEvents, this);
         this.system.getComponent(CVOrbitNavigation).ins.keyNavActive.on("value", this.onKeyboardNavigation, this);
-        this.system.getComponent(CVTape).ins.enabled.on("value", this.onMeasure, this);
+        this.system.getComponent(CVSetup).tape.ins.enabled.on("value", this.onMeasure, this);
     }
 
     protected disconnected()
     {
         this.resizeObserver.disconnect();
 
-        this.system.getComponent(CVTape).ins.enabled.off("value", this.onMeasure, this);
+        this.system.getComponent(CVSetup).tape.ins.enabled.off("value", this.onMeasure, this);
         this.system.getComponent(CVOrbitNavigation).ins.keyNavActive.off("value", this.onKeyboardNavigation, this);
         this.system.getMainComponent(CVDocumentProvider).activeComponent.setup.navigation.ins.pointerEnabled.off("value", this.enablePointerEvents, this);
 
@@ -225,7 +227,7 @@ export default class SceneView extends SystemView
     }
 
     protected onMeasure() {
-        this.measuring = this.system.getComponent(CVTape).ins.enabled.value;
+        this.measuring = this.system.getComponent(CVSetup).tape.ins.enabled.value;
         this.style.cursor = this.measuring ? "default" : "grab";
     }
 
