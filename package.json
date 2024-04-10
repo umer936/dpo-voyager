@@ -29,7 +29,7 @@
             "node_modules/@ff/server"
         ]
     },
-    "engines":{
+    "engines": {
         "node": ">=14.15.0"
     },
     "repository": {
@@ -61,6 +61,7 @@
         "hotkeys-js": "^3.8.7",
         "lit-element": "^2.5.1",
         "lit-html": "^1.4.1",
+        "manifesto.js": "github:JulieWinchester/manifesto#3dtsg-dev-dist",
         "moment": "^2.29.4",
         "morgan": "^1.10.0",
         "nodemon": "^3.0.1",

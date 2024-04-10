@@ -52,8 +52,9 @@ import CVScene from "client/components/CVScene";
 import CVAnnotationView, { Annotation } from "client/components/CVAnnotationView";
 import { ELanguageType, EUnitType } from "client/schema/common";
 import CVModel2 from "client/components/CVModel2";
-import CTransform from "client/../../libs/ff-scene/source/components/CTransform";
-import CScene from "client/../../libs/ff-scene/source/components/CScene";
+import IIIFManifest from "client/io/IIIFMainfestReader";
+import { ManifestResource, RotateTransform, ScaleTransform, SpecificResource, SpecificResourceForBody, TranslateTransform } from "manifesto.js/dist-esmodule";
+import { Euler, Matrix4, Vector3 } from "three";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +99,11 @@ export interface IExplorerApplicationProps
     /** ISO 639-1 language code to change active component language */
     lang?: string;
 }
+
+const _mat4a = new Matrix4();
+const _mat4b = new Matrix4();
+const _vec3a = new Vector3();
+const _euler = new Euler();
 
 /**
  * Voyager Explorer main application.
@@ -237,7 +243,7 @@ Version: ${ENV_VERSION}
         return this.assetReader.getJSON(documentPath)
             .then(data => {
                 if(data.type && data.type == "Manifest") {
-                    this.loadIIIFManifest(data);
+                    this.loadIIIFManifest(JSON.stringify(data));
                 }
                 else {
                     merge = merge === undefined ? !data.lights && !data.cameras : merge;
@@ -751,27 +757,85 @@ Version: ${ENV_VERSION}
         console.log("LOADING IIIF MANIFEST");
         const activeDoc = this.documentProvider.activeComponent;
 
-        const scenes = data.items.filter(elem => elem.type == "Scene");
+        const iiifManifest = new IIIFManifest(data);
+
+        iiifManifest.loadManifest().then(() => {
+        activeDoc.ins.title.setValue(iiifManifest.manifest.__jsonld.label["en"][0]);
+        const scenes = iiifManifest.scenes;
         scenes.forEach(scene => {
-            const bgColor = scene.backgroundColor;
+
+            const bgColor = scene.getBackgroundColor() as any;
             this.setBackgroundStyle("solid");
             if(bgColor) {
-                this.setBackgroundColor(bgColor);
+                this.setBackgroundColor("rgb("+bgColor.red+","+bgColor.green+","+bgColor.blue+")");
             }
             else {
                 this.setBackgroundColor("#000000");
             }
 
-            const annoPages = scene.items.filter(elem => elem.type == "AnnotationPage");
-            annoPages.forEach(page => {
-                const annotations = page.items.filter(elem => elem.type == "Annotation");
-                annotations.forEach(annotation => {
+            const annos = iiifManifest.annotationsFromScene(scene);
+
+            const filteredAnnos = annos.filter((anno) => {
+                const body = anno.getBody3D();
+                return (
+                    anno.getMotivation()?.[0] === "painting" &&
+                    (body.isSpecificResource || body?.getType() === "model")
+                );
+            });
+            
+            filteredAnnos.forEach((annotation) => {
+                const model = annotation.getBody3D();
+                const modelTarget = annotation.getTarget();
+                const newModel = activeDoc.appendModel(model.isSpecificResource ? model.getSource()?.id : model.id);
+                const nodeTransform = newModel.transform;
+                newModel.ins.localUnits.setValue(EUnitType.mm);
+
+                if (model.isSpecificResource) {
+                    const transforms = (model as SpecificResourceForBody).getTransform() || [];
+ 
+                    _mat4a.identity();
+                    transforms.forEach((transform) => {
+                        _mat4b.identity();
+                        if(transform.isTranslateTransform) {
+                            const translation = (transform as TranslateTransform).getTranslation() as any;
+                            if (translation) {
+                                _vec3a.set(translation.x,translation.y,translation.z);
+                                _mat4b.setPosition(_vec3a);
+                            }
+                        }
+                        else if (transform.isRotateTransform) {
+                            const rotation = (transform as RotateTransform).getRotation() as any;
+                            _euler.set(rotation.x,rotation.y,rotation.z);
+                            _mat4b.makeRotationFromEuler(_euler);
+                        }
+                        else if(transform.isScaleTransform) {
+                            const scale = (transform as ScaleTransform).getScale() as any;
+                            _mat4b.makeScale(scale.x,scale.y,scale.z);
+                        }
+                        _mat4a.premultiply(_mat4b);
+                    });
+                    newModel.setFromMatrix(_mat4a);                 
+                }
+
+                if (typeof modelTarget !== "string") {
+                    const selector = modelTarget.getSelector();
+                    if (selector && selector.isPointSelector) {
+                      const position = selector.getLocation();
+                      nodeTransform.ins.position.setValue([position.x, position.y, position.z]);
+                    }
+                }
+            });
+
+            //const annoPages = scene.items.filter(elem => elem.type == "AnnotationPage");
+            //annoPages.forEach(page => {
+                //const annotations = page.items.filter(elem => elem.type == "Annotation");
+                //annotations.forEach(annotation => {
                     //const modelSources = annotation.body.source.filter(elem => elem.type == "Model");
                     //modelSources.forEach(model => {console.log("D");
-                    if(annotation.body.type == "Model") {
-                        const model = annotation.body;
-                        const newModel = activeDoc.appendModel(model.id);
-                        const nodeTransform = newModel.transform;
+                    //if(annotation.body.type == "Model") {
+                       // const model = annotation.body;
+                        //const newModel = activeDoc.appendModel(model.id);
+                        //const nodeTransform = newModel.transform;
                         //newModel.ins.localUnits.setValue(EUnitType.mm);
                         
                         // look for translation
@@ -807,7 +871,7 @@ Version: ${ENV_VERSION}
                             });
                         }*/
                     //});
-                    }
+                    //}
 
                     /*const cameraSources = annotation.body.source.filter(elem => elem.type == "Camera");
                     // only handle one camera for now
@@ -828,9 +892,10 @@ Version: ${ENV_VERSION}
                             this.setCameraOffset(translation[0].x, translation[0].y, translation[0].z);
                         }
                     }*/
-                });
-            });
+                //});
+            //});
         });
+    });
     }
 }
 
