@@ -23,6 +23,7 @@ import CVRenderTool from "../components/CVRenderTool";
 import CVEnvironmentTool from "../components/CVEnvironmentTool";
 import CVLightTool from "../components/CVLightTool";
 import CVTapeTool from "../components/CVTapeTool";
+import CVPolylineTool from "../components/CVPolylineTool";
 import CVSliceTool from "../components/CVSliceTool";
 
 import NVTools from "../nodes/NVTools";
@@ -38,6 +39,7 @@ const types = [
     CVEnvironmentTool,
     CVLightTool,
     CVTapeTool,
+    CVPolylineTool,
     CVSliceTool,
 
     NVTools,

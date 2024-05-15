@@ -158,7 +158,7 @@ export default class CVTape extends CObject3D
         if (ins.boundingBox.changed && ins.boundingBox.value) {
             ins.boundingBox.value.getSize(_vec3a);
             const radius = _vec3a.length() * 0.5;
-
+            
             startPin.scale.setScalar(radius * 0.003);
             startPin.updateMatrix();
 
