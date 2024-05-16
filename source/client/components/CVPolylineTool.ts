@@ -17,6 +17,7 @@
 
 import "../ui/PropertyBoolean";
 import "../ui/PropertyString";
+import "../ui/PropertyColor"; // Import the color property
 
 import CVDocument from "./CVDocument";
 import { EPolylineState } from "./CVPolyline";
@@ -80,12 +81,18 @@ export class PolylineToolView extends ToolView<CVPolylineTool>
 
         this.statusMsg = text;
 
-        return html`<div class="sv-section"><ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
+        return html`
+        <div class="sv-section">
+            <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
             <div class="sv-tool-controls">
                 <sv-property-boolean .property=${enabled} .language=${language} name=${language.getLocalizedString("Polyline Tool")}></sv-property-boolean>
+                <sv-property-color .property=${polyline.ins.color} .language=${language} name=${language.getLocalizedString("Polyline Color")}></sv-property-color>
                 <div class="sv-property-view">
-                <div class="ff-string" aria-live="polite" aria-atomic="true"></div></div>
-            </div></div>`;
+                    <div class="ff-string" aria-live="polite" aria-atomic="true"></div>
+                </div>
+            </div>
+        </div>
+        `;
     }
 
     protected updated(changedProperties): void

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, Box3Helper, BufferAttribute } from "three";
+import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, Box3Helper, BufferAttribute, Color } from "three";
 
 import CObject3D, { Node, types, IPointerEvent } from "@ff/scene/components/CObject3D";
 
@@ -47,7 +47,8 @@ export default class CVPolyline extends CObject3D
         boundingBox: types.Object("Scene.BoundingBox", Box3),
         enabled: types.Boolean("Polyline.Enabled", false),
         globalUnits: types.Enum("Model.GlobalUnits", EUnitType, EUnitType.cm),
-        localUnits: types.Enum("Model.LocalUnits", EUnitType, EUnitType.cm)
+        localUnits: types.Enum("Model.LocalUnits", EUnitType, EUnitType.cm),
+        color: types.Vector3("Polyline.Color", [1, 1, 1]), // Default color white
     };
 
     protected static readonly polylineOuts = {
@@ -87,6 +88,9 @@ export default class CVPolyline extends CObject3D
 
         // Listen for keydown events
         window.addEventListener("keydown", this.onKeyDown);
+
+        // Listen for changes to the color input
+        this.ins.color.on("value", this.onColorChanged);
     }
 
     dispose()
@@ -181,7 +185,7 @@ export default class CVPolyline extends CObject3D
     }
 
     protected endPolyline() {
-        if (this.pins.length > 1) {
+        if (this.pins.length > 0) {
             this.polylines.push({ pins: [...this.pins], lines: [...this.lines] });
             this.pins = [];
             this.lines = [];
@@ -248,7 +252,7 @@ export default class CVPolyline extends CObject3D
             points.push(pins[pins.length - 2].position)
             points.push(pins[pins.length - 1].position)
             const lineGeometry = new BufferGeometry().setFromPoints(points);
-            const lineMaterial = new LineBasicMaterial();
+            const lineMaterial = new LineBasicMaterial({color: new Color().fromArray(ins.color.value)});
             lineMaterial.depthTest = false;
             lineMaterial.transparent = true;
             const line = new Line(lineGeometry, lineMaterial);
@@ -271,5 +275,13 @@ export default class CVPolyline extends CObject3D
         });
 
         ins.localUnits.setValue(toUnits);
+    }
+
+    protected onColorChanged = () => {
+        const color = new Color().fromArray(this.ins.color.value);
+
+        this.lines.forEach(line => {
+            (line.material as LineBasicMaterial).color.copy(color);
+        });
     }
 }
