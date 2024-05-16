@@ -187,6 +187,12 @@ export default class CVPolyline extends CObject3D
     protected endPolyline() {
         if (this.pins.length > 0) {
             this.polylines.push({ pins: [...this.pins], lines: [...this.lines] });
+            if (this.pins.length > 0)
+            {
+                const lastPin = this.pins[this.pins.length - 1];
+                lastPin.visible = false;
+                this.object3D.remove(lastPin);
+            }
             this.pins = [];
             this.lines = [];
             this.outs.state.setValue(EPolylineState.SetStart);
@@ -218,36 +224,29 @@ export default class CVPolyline extends CObject3D
         const position = event.view.pickPosition(event, bounds).applyMatrix4(worldMatrix); 
         const normal = event.view.pickNormal(event).applyMatrix3(_mat3).normalize();
 
-        // update pins and measurement line
+        // update pins and line
         const { pins, lines, ins, outs } = this;
 
-        if (outs.state.value === EPolylineState.SetStart) 
-        {
-            const pin = new Pin();
-            pin.matrixAutoUpdate = false;
-            pin.visible = true;
-            pin.position.copy(position);
-            _vec3a.copy(normal);
-            pin.quaternion.setFromUnitVectors(_vec3up, _vec3a);
-            pin.scale.setScalar(.1);
-            pin.updateMatrix();
-            pins.push(pin);
-            this.object3D.add(pin);
-
-            outs.state.setValue(EPolylineState.SetNext);
+        // Hide the previous pin
+        if (pins.length > 0) {
+            const lastPin = pins[pins.length - 1];
+            lastPin.visible = false;
+            this.object3D.remove(lastPin);
         }
-        else {
-            const pin = new Pin();
-            pin.matrixAutoUpdate = false;
-            pin.visible = true;
-            pin.position.copy(position);
-            _vec3a.copy(normal);
-            pin.quaternion.setFromUnitVectors(_vec3up, _vec3a);
-            pin.scale.setScalar(.1);
-            pin.updateMatrix();
-            pins.push(pin);
-            this.object3D.add(pin);
 
+        const pin = new Pin();
+        pin.matrixAutoUpdate = false;
+        pin.visible = true;
+        pin.position.copy(position);
+        _vec3a.copy(normal);
+        pin.quaternion.setFromUnitVectors(_vec3up, _vec3a);
+        pin.scale.setScalar(.1);
+        pin.updateMatrix();
+        pins.push(pin);
+        this.object3D.add(pin);
+
+        if (outs.state.value === EPolylineState.SetNext) 
+        {
             const points = [];
             points.push(pins[pins.length - 2].position)
             points.push(pins[pins.length - 1].position)
@@ -260,8 +259,9 @@ export default class CVPolyline extends CObject3D
             this.lines.push(line);
             this.object3D.add(line);
         }
-    }
 
+        outs.state.setValue(EPolylineState.SetNext);
+    }
     protected updateUnitScale()
     {
         const ins = this.ins;
