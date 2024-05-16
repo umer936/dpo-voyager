@@ -75,7 +75,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool>
             text = language.getLocalizedString("Tap on model to set start of polyline") + ".";
         }
         else {
-            text = language.getLocalizedString("Tap on model to set more points for polyline") + ".";
+            text = language.getLocalizedString("Tap on model to set more points for this polyline or press the Enter key to end this polyline") + ".";
         }
 
         this.statusMsg = text;

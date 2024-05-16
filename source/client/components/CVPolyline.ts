@@ -34,7 +34,7 @@ const _mat3 = new Matrix3();
 const _vec3a = new Vector3();
 const _vec3up = new Vector3(0, 1, 0);
 
-export enum EPolylineState { SetStart, SetNext, SetEnd }
+export enum EPolylineState { SetStart, SetNext }
 
 export default class CVPolyline extends CObject3D
 {
@@ -66,6 +66,7 @@ export default class CVPolyline extends CObject3D
 
     protected pins: Pin[] = [];
     protected lines: Line[] = [];
+    protected polylines: { pins: Pin[], lines: Line[] }[] = [];
 
     constructor(node: Node, id: string)
     {
@@ -74,6 +75,7 @@ export default class CVPolyline extends CObject3D
         this.object3D = new Group();
         this.pins = [];
         this.lines = [];
+        this.polylines = [];
     }
 
     create()
@@ -82,6 +84,9 @@ export default class CVPolyline extends CObject3D
 
         const scene = this.getGraphComponent(CVScene);
         this.ins.boundingBox.linkFrom(scene.outs.boundingBox);
+
+        // Listen for keydown events
+        window.addEventListener("keydown", this.onKeyDown);
     }
 
     dispose()
@@ -98,12 +103,18 @@ export default class CVPolyline extends CObject3D
         });
         this.lines.length = 0;
 
+        // Remove polylines
+        this.polylines.forEach(polyline => {
+            polyline = null;
+        });
+        this.polylines.length = 0;
+
         super.dispose();
     }
 
     update(context)
     {
-        const { pins, lines, ins } = this;
+        const { pins, lines, polylines, ins } = this;
 
         if (ins.enabled.changed) {
             ins.visible.setValue(ins.enabled.value);
@@ -111,7 +122,7 @@ export default class CVPolyline extends CObject3D
 
         super.update(context);
 
-        // if tape is enabled, listen for pointer events to set tape start/end
+        // if tape is enabled, listen for pointer events to set polyline points
         if (ins.enabled.changed) {
             if (ins.enabled.value) {
                 this.outs.state.setValue(EPolylineState.SetStart);
@@ -168,6 +179,22 @@ export default class CVPolyline extends CObject3D
             enabled: ins.visible.cloneValue()
         };
     }
+
+    protected endPolyline() {
+        if (this.pins.length > 1) {
+            this.polylines.push({ pins: [...this.pins], lines: [...this.lines] });
+            this.pins = [];
+            this.lines = [];
+            this.outs.state.setValue(EPolylineState.SetStart);
+        }
+    }
+    
+
+    protected onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Enter") {
+            this.endPolyline();
+        }
+    };    
 
     protected onPointerUp(event: IPointerEvent)
     {
