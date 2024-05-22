@@ -1,25 +1,8 @@
-/**
- * 3D Foundation Project
- * Copyright 2024 Smithsonian Institution
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, Box3Helper, BufferAttribute, Color } from "three";
+import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, Color } from "three";
 
 import CObject3D, { Node, types, IPointerEvent } from "@ff/scene/components/CObject3D";
 
-import { ITape } from "client/schema/setup";
+import { IPolyline } from "client/schema/setup";
 
 import Pin from "../utils/Pin";
 import CVModel2 from "./CVModel2";
@@ -48,7 +31,8 @@ export default class CVPolyline extends CObject3D
         enabled: types.Boolean("Polyline.Enabled", false),
         globalUnits: types.Enum("Model.GlobalUnits", EUnitType, EUnitType.cm),
         localUnits: types.Enum("Model.LocalUnits", EUnitType, EUnitType.cm),
-        color: types.Vector3("Polyline.Color", [1, 1, 1]), // Default color white
+        color: types.Vector3("Polyline.Color", [0, 0, 0]), // Default color black
+        label: types.String("Polyline.Label", "") // Label property
     };
 
     protected static readonly polylineOuts = {
@@ -65,9 +49,15 @@ export default class CVPolyline extends CObject3D
         ];
     }
 
+    get snapshotProperties() {
+        return [
+            this.ins.visible
+        ];
+    }
+
     protected pins: Pin[] = [];
     protected lines: Line[] = [];
-    protected polylines: { pins: Pin[], lines: Line[] }[] = [];
+    protected polylines: { pins: Pin[], lines: Line[], label: string }[] = [];
 
     constructor(node: Node, id: string)
     {
@@ -85,6 +75,7 @@ export default class CVPolyline extends CObject3D
 
         const scene = this.getGraphComponent(CVScene);
         this.ins.boundingBox.linkFrom(scene.outs.boundingBox);
+        this.ins.globalUnits.linkFrom(scene.ins.units);
 
         // Listen for keydown events
         window.addEventListener("keydown", this.onKeyDown);
@@ -129,10 +120,12 @@ export default class CVPolyline extends CObject3D
         // if tape is enabled, listen for pointer events to set polyline points
         if (ins.enabled.changed) {
             if (ins.enabled.value) {
+                console.log("Button on");
                 this.outs.state.setValue(EPolylineState.SetStart);
                 this.system.on<IPointerEvent>("pointer-up", this.onPointerUp, this);
             }
             else {
+                console.log("Button off");
                 this.system.off<IPointerEvent>("pointer-up", this.onPointerUp, this);
             }
         }
@@ -168,14 +161,14 @@ export default class CVPolyline extends CObject3D
         return true;
     }
 
-    fromData(data: ITape)
+    fromData(data: IPolyline)
     {
         this.ins.copyValues({
             visible: data.enabled,   // TODO: should probably be visible instead of enabled
         });
     }
 
-    toData(): ITape
+    toData(): IPolyline
     {
         const ins = this.ins;
 
@@ -186,7 +179,7 @@ export default class CVPolyline extends CObject3D
 
     protected endPolyline() {
         if (this.pins.length > 0) {
-            this.polylines.push({ pins: [...this.pins], lines: [...this.lines] });
+            this.polylines.push({ pins: [...this.pins], lines: [...this.lines], label: this.ins.label.value });
             if (this.pins.length > 0)
             {
                 const lastPin = this.pins[this.pins.length - 1];
@@ -251,7 +244,7 @@ export default class CVPolyline extends CObject3D
             points.push(pins[pins.length - 2].position)
             points.push(pins[pins.length - 1].position)
             const lineGeometry = new BufferGeometry().setFromPoints(points);
-            const lineMaterial = new LineBasicMaterial({color: new Color().fromArray(ins.color.value)});
+            const lineMaterial = new LineBasicMaterial({ color: new Color().fromArray(ins.color.value) });
             lineMaterial.depthTest = false;
             lineMaterial.transparent = true;
             const line = new Line(lineGeometry, lineMaterial);
@@ -262,6 +255,7 @@ export default class CVPolyline extends CObject3D
 
         outs.state.setValue(EPolylineState.SetNext);
     }
+
     protected updateUnitScale()
     {
         const ins = this.ins;
