@@ -2,18 +2,20 @@ import { customElement, html, LitElement, property } from "lit-element";
 import { Color } from "three";
 
 @customElement("sv-property-labeled-color")
-export class PropertyLabeledColor extends LitElement
-{
+export class PropertyLabeledColor extends LitElement {
     @property({ type: Object }) property: any;
     @property({ type: Object }) language: any;
 
     @property({ type: String }) label: string = "";
+    @property({ type: String }) colorValue: string = "#ffffff"; // Default color value
 
     protected onColorChange(event: Event) {
         const input = event.target as HTMLInputElement;
-        const color = new Color(input.value).toArray();
-        this.property.setValue(color);
-        this.dispatchEvent(new CustomEvent('color-change', { detail: { color: color } }));
+        const newColor = new Color(input.value);
+        const colorArray = newColor.toArray();
+        this.colorValue = input.value;
+        this.property.setValue(colorArray);
+        this.dispatchEvent(new CustomEvent('color-change', { detail: { color: colorArray } }));
     }
 
     protected onLabelChange(event: Event) {
@@ -26,7 +28,7 @@ export class PropertyLabeledColor extends LitElement
         return html`
             <div class="property-labeled-color">
                 <label for="color-input">Annotation Color:</label>
-                <input id="color-input" type="color" @change=${this.onColorChange} .value=${new Color().fromArray(this.property.value).getStyle()}>
+                <input id="color-input" type="color" @change=${this.onColorChange} .value=${this.colorValue}>
                 <label for="text-input">Annotation Label:</label>
                 <input id="text-input" type="text" @input=${this.onLabelChange} placeholder="Enter annotation label" .value=${this.label}>
             </div>

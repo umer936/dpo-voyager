@@ -31,7 +31,7 @@ export default class CVPolyline extends CObject3D
         enabled: types.Boolean("Polyline.Enabled", false),
         globalUnits: types.Enum("Model.GlobalUnits", EUnitType, EUnitType.cm),
         localUnits: types.Enum("Model.LocalUnits", EUnitType, EUnitType.cm),
-        color: types.Vector3("Polyline.Color", [0, 0, 0]), // Default color black
+        color: types.Vector3("Polyline.Color", [1, 1, 1]), // Default color white
         label: types.String("Polyline.Label", "") // Label property
     };
 
