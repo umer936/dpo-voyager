@@ -1,15 +1,13 @@
-import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, Color } from "three";
-
+import { Matrix3, Vector3, Box3, Group, BufferGeometry, Color, Mesh } from "three";
 import CObject3D, { Node, types, IPointerEvent } from "@ff/scene/components/CObject3D";
-
 import { IPolyline } from "client/schema/setup";
-
 import Pin from "../utils/Pin";
 import CVModel2 from "./CVModel2";
 import CVScene from "client/components/CVScene";
 import { EUnitType } from "client/schema/common";
 import unitScaleFactor from "client/utils/unitScaleFactor";
 import { getMeshTransform } from "client/utils/Helpers";
+import { MeshLine, MeshLineMaterial, MeshLineRaycast } from "../utils/THREE.meshline.js";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -19,10 +17,8 @@ const _vec3up = new Vector3(0, 1, 0);
 
 export enum EPolylineState { SetStart, SetNext }
 
-export default class CVPolyline extends CObject3D
-{
+export default class CVPolyline extends CObject3D {
     static readonly typeName: string = "CVPolyline";
-
     static readonly text: string = "Polyline";
     static readonly icon: string = "";
 
@@ -56,11 +52,10 @@ export default class CVPolyline extends CObject3D
     }
 
     protected pins: Pin[] = [];
-    protected lines: Line[] = [];
-    protected polylines: { pins: Pin[], lines: Line[], label: string }[] = [];
+    protected lines: Mesh[] = [];
+    protected polylines: { pins: Pin[], lines: Mesh[], label: string }[] = [];
 
-    constructor(node: Node, id: string)
-    {
+    constructor(node: Node, id: string) {
         super(node, id);
 
         this.object3D = new Group();
@@ -69,8 +64,7 @@ export default class CVPolyline extends CObject3D
         this.polylines = [];
     }
 
-    create()
-    {
+    create() {
         super.create();
 
         const scene = this.getGraphComponent(CVScene);
@@ -84,8 +78,7 @@ export default class CVPolyline extends CObject3D
         this.ins.color.on("value", this.onColorChanged);
     }
 
-    dispose()
-    {
+    dispose() {
         // Remove pins
         this.pins.forEach(pin => {
             pin = null;
@@ -107,8 +100,7 @@ export default class CVPolyline extends CObject3D
         super.dispose();
     }
 
-    update(context)
-    {
+    update(context) {
         const { pins, lines, polylines, ins } = this;
 
         if (ins.enabled.changed) {
@@ -120,18 +112,15 @@ export default class CVPolyline extends CObject3D
         // if tape is enabled, listen for pointer events to set polyline points
         if (ins.enabled.changed) {
             if (ins.enabled.value) {
-                console.log("Button on");
                 this.outs.state.setValue(EPolylineState.SetStart);
                 this.system.on<IPointerEvent>("pointer-up", this.onPointerUp, this);
-            }
-            else {
-                console.log("Button off");
+            } else {
                 this.system.off<IPointerEvent>("pointer-up", this.onPointerUp, this);
             }
         }
 
-        if(ins.visible.changed) {
-            if(ins.visible.value) {
+        if (ins.visible.changed) {
+            if (ins.visible.value) {
                 for (let i = 0; i < pins.length - 1; i++) {
                     const pin = pins[i];
                     const line = lines[i];
@@ -145,7 +134,7 @@ export default class CVPolyline extends CObject3D
                         line.visible = false;
                     }
                 }
-                
+
                 // Handle the last pin separately
                 const lastPin = pins[pins.length - 1];
                 if (lastPin) {
@@ -161,15 +150,13 @@ export default class CVPolyline extends CObject3D
         return true;
     }
 
-    fromData(data: IPolyline)
-    {
+    fromData(data: IPolyline) {
         this.ins.copyValues({
-            visible: data.enabled,   // TODO: should probably be visible instead of enabled
+            visible: data.enabled, // TODO: should probably be visible instead of enabled
         });
     }
 
-    toData(): IPolyline
-    {
+    toData(): IPolyline {
         const ins = this.ins;
 
         return {
@@ -180,8 +167,7 @@ export default class CVPolyline extends CObject3D
     protected endPolyline() {
         if (this.pins.length > 0) {
             this.polylines.push({ pins: [...this.pins], lines: [...this.lines], label: this.ins.label.value });
-            if (this.pins.length > 0)
-            {
+            if (this.pins.length > 0) {
                 const lastPin = this.pins[this.pins.length - 1];
                 lastPin.visible = false;
                 this.object3D.remove(lastPin);
@@ -191,16 +177,14 @@ export default class CVPolyline extends CObject3D
             this.outs.state.setValue(EPolylineState.SetStart);
         }
     }
-    
 
     protected onKeyDown = (event: KeyboardEvent) => {
         if (event.key === "Enter") {
             this.endPolyline();
         }
-    };    
+    };
 
-    protected onPointerUp(event: IPointerEvent)
-    {
+    protected onPointerUp(event: IPointerEvent) {
         if (event.isDragging || !event.component || !event.component.is(CVModel2)) {
             return;
         }
@@ -216,6 +200,13 @@ export default class CVPolyline extends CObject3D
 
         const position = event.view.pickPosition(event, bounds).applyMatrix4(worldMatrix); 
         const normal = event.view.pickNormal(event).applyMatrix3(_mat3).normalize();
+
+        // Debugging the position and normal
+        console.log("Position:", position);
+        console.log("Normal:", normal);
+
+        // Slightly offset the position along the normal to prevent submerging
+        position.addScaledVector(normal, 0.01);
 
         // update pins and line
         const { pins, lines, ins, outs } = this;
@@ -238,26 +229,41 @@ export default class CVPolyline extends CObject3D
         pins.push(pin);
         this.object3D.add(pin);
 
-        if (outs.state.value === EPolylineState.SetNext) 
-        {
+        if (outs.state.value === EPolylineState.SetNext) {
             const points = [];
             points.push(pins[pins.length - 2].position)
             points.push(pins[pins.length - 1].position)
-            const lineGeometry = new BufferGeometry().setFromPoints(points);
-            const lineMaterial = new LineBasicMaterial({ color: new Color().fromArray(ins.color.value) });
-            lineMaterial.depthTest = false;
-            lineMaterial.transparent = true;
-            const line = new Line(lineGeometry, lineMaterial);
-            line.visible = true;
-            this.lines.push(line);
-            this.object3D.add(line);
+            const geometry = new BufferGeometry().setFromPoints(points);
+            const line = new MeshLine();
+            line.setGeometry(geometry);
+            line.depthTest = false;
+            line.transparent = true;
+            line.depthWrite = false;
+            line.renderOrder = 1;
+
+            // Adjusting material properties to avoid z-fighting
+            const material = new MeshLineMaterial({
+                color: new Color().fromArray(ins.color.value),
+                lineWidth: 0.2,
+                polygonOffset: true,
+                polygonOffsetFactor: -1000,
+                polygonOffsetUnits: -1000
+            });
+
+            const mesh = new Mesh(line.geometry, material);
+            mesh.renderOrder = 1; // Ensure it renders on top
+            lines.push(mesh);
+            this.object3D.add(mesh);
+
+            // Debugging the line and its geometry
+            console.log("Line Geometry:", geometry);
+            console.log("Mesh:", mesh);
         }
 
         outs.state.setValue(EPolylineState.SetNext);
     }
 
-    protected updateUnitScale()
-    {
+    protected updateUnitScale() {
         const ins = this.ins;
         const fromUnits = ins.localUnits.getValidatedValue();
         const toUnits = ins.globalUnits.getValidatedValue();
@@ -275,7 +281,7 @@ export default class CVPolyline extends CObject3D
         const color = new Color().fromArray(this.ins.color.value);
 
         this.lines.forEach(line => {
-            (line.material as LineBasicMaterial).color.copy(color);
+            (line.material as MeshLineMaterial).color.copy(color);
         });
     }
 }

@@ -50,8 +50,6 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
 
         let text;
 
-        console.log("Tool detects state: " + enabled.value);
-
         if (!enabled.value) {
             text = language.getLocalizedString("Switch on to annotate polylines") + ".";
         } else if (state === EPolylineState.SetStart) {
@@ -85,7 +83,6 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
     }
 
     protected updated(changedProperties): void {
-        console.log("Updating polyline tool");
         super.updated(changedProperties);
 
         const container = this.getElementsByClassName("ff-string").item(0) as HTMLElement;
