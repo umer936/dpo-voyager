@@ -201,10 +201,6 @@ export default class CVPolyline extends CObject3D {
         const position = event.view.pickPosition(event, bounds).applyMatrix4(worldMatrix); 
         const normal = event.view.pickNormal(event).applyMatrix3(_mat3).normalize();
 
-        // Debugging the position and normal
-        console.log("Position:", position);
-        console.log("Normal:", normal);
-
         // Slightly offset the position along the normal to prevent submerging
         position.addScaledVector(normal, 0.01);
 
@@ -254,10 +250,6 @@ export default class CVPolyline extends CObject3D {
             mesh.renderOrder = 1; // Ensure it renders on top
             lines.push(mesh);
             this.object3D.add(mesh);
-
-            // Debugging the line and its geometry
-            console.log("Line Geometry:", geometry);
-            console.log("Mesh:", mesh);
         }
 
         outs.state.setValue(EPolylineState.SetNext);
