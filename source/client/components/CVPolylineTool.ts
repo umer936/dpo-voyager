@@ -53,7 +53,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         if (!enabled.value) {
             text = language.getLocalizedString("Switch on to annotate polylines") + ".";
         } else if (state === EPolylineState.SetStart) {
-            text = language.getLocalizedString("Tap on model to set start of polyline") + ".";
+            text = language.getLocalizedString("Choose an annotation type and then tap on model to set start of polyline") + ".";
         } else {
             text = language.getLocalizedString("Tap on model to set more points for this polyline or press the Enter key to end this polyline") + ".";
         }
