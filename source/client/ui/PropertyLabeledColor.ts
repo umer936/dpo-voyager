@@ -21,7 +21,8 @@ export class PropertyLabeledColor extends LitElement {
     @property({ type: Boolean }) addingAnnotation: boolean = false; // Flag to indicate whether user is adding annotation
     @property({ type: Object }) colorLabelMap: ColorLabelMap = {}; // Mapping between colors and labels
     @property({ type: Boolean }) colorPickerClicked: boolean = true; // Flag to indicate whether the color picker has been clicked
-    @property({ type: Boolean }) showError: boolean = false; // Flag to indicate whether to show the error message
+    @property({ type: Boolean }) showColorError: boolean = false; // Flag to indicate whether to show the color error message
+    @property({ type: Boolean }) showLabelError: boolean = false; // Flag to indicate whether to show the color error message
 
     static styles = css`
         .error-message {
@@ -45,14 +46,12 @@ export class PropertyLabeledColor extends LitElement {
             const [label, _] = associatedLabel;
             alert(`Warning: The color you selected is already associated with the annotation type "${label}".`);
         }
-
-        this.showError = false;
     }
 
     protected onColorPickerClick() {
         // Set the colorPickerClicked flag to true when the color picker is clicked
         this.colorPickerClicked = true;
-        this.showError = false;
+        this.showColorError = false;
     }
 
     protected onLabelChange(event: Event) {
@@ -75,13 +74,20 @@ export class PropertyLabeledColor extends LitElement {
     protected onCustomLabelChange(event: Event) {
         const input = event.target as HTMLInputElement;
         this.selectedLabel = input.value;
+        this.showLabelError = false;
     }
 
     protected addAnnotation() {
         if (!this.colorPickerClicked) {
-            // If no label or color is selected, prevent adding the annotation
-            this.showError = true;
+            // If no color is selected, prevent adding the annotation
+            this.showColorError = true;
             return;
+        }
+
+        if (this.selectedLabel == "")
+        {
+            this.showLabelError = true;
+           return; 
         }
 
         const annotation: Annotation = {
@@ -105,7 +111,8 @@ export class PropertyLabeledColor extends LitElement {
 
     protected render() {
         const colorHasLabel = !!this.colorLabelMap[this.selectedColor];
-        const errorMessage = this.showError ? html`<div class="error-message">ERROR: Please select a color for the annotation.</div>` : html``;
+        const colorErrorMessage = this.showColorError ? html`<div class="error-message">ERROR: Please select a color for the annotation.</div>` : html``;
+        const labelErrorMessage = this.showLabelError ? html`<div class="error-message">ERROR: Please enter a label for the annotation.</div>` : html``;
 
         return html`
             <div class="property-labeled-color">
@@ -126,7 +133,8 @@ export class PropertyLabeledColor extends LitElement {
                         <option value="__add_annotation__">Add Annotation...</option>
                     </select>
                 `}
-                ${errorMessage}
+                ${colorErrorMessage}
+                ${labelErrorMessage}
             </div>
         `;
     }
