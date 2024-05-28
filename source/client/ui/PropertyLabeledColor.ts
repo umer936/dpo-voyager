@@ -79,6 +79,8 @@ export class PropertyLabeledColor extends LitElement {
     
         this.addingAnnotation = false;
         this.colorSelected = false; // Reset the color selection status
+        this.dispatchEvent(new CustomEvent('label-change', { detail: { label: this.selectedLabel } }));
+        this.dispatchEvent(new CustomEvent('color-change', { detail: { color: this.selectedColor } }));
         this.requestUpdate();
     }    
 

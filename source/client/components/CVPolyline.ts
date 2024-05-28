@@ -185,7 +185,7 @@ export default class CVPolyline extends CObject3D {
     };
 
     protected onPointerUp(event: IPointerEvent) {
-        if (event.isDragging || !event.component || !event.component.is(CVModel2)) {
+        if (event.isDragging || !event.component || !event.component.is(CVModel2) || this.ins.label.value == "") {
             return;
         }
 
