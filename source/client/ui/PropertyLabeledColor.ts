@@ -36,10 +36,6 @@ export class PropertyLabeledColor extends LitElement {
         const input = event.target as HTMLInputElement;
         this.selectedColor = input.value;
 
-        const newColor = new Color(input.value);
-        const colorArray = newColor.toArray();
-        this.property.setValue(colorArray);
-
         // Check if the selected color is already associated with another label
         const associatedLabel = Object.entries(this.colorLabelMap).find(([_, color]) => color === this.selectedColor && this.selectedLabel !== _);
         if (associatedLabel) {
@@ -66,6 +62,9 @@ export class PropertyLabeledColor extends LitElement {
             this.selectedColor = this.colorLabelMap[selectedValue];
             this.dispatchEvent(new CustomEvent('label-change', { detail: { label: this.selectedLabel } }));
             this.dispatchEvent(new CustomEvent('color-change', { detail: { color: this.selectedColor } }));
+            const newColor = new Color(this.selectedColor);
+            const colorArray = newColor.toArray();
+            this.property.setValue(colorArray);
         }
 
         this.requestUpdate();
@@ -101,6 +100,9 @@ export class PropertyLabeledColor extends LitElement {
         this.colorPickerClicked = false; // Reset the color selection status
         this.dispatchEvent(new CustomEvent('label-change', { detail: { label: this.selectedLabel } }));
         this.dispatchEvent(new CustomEvent('color-change', { detail: { color: this.selectedColor } }));
+        const newColor = new Color(this.selectedColor);
+        const colorArray = newColor.toArray();
+        this.property.setValue(colorArray);
         this.requestUpdate();
     }
 
@@ -110,7 +112,6 @@ export class PropertyLabeledColor extends LitElement {
     }
 
     protected render() {
-        const colorHasLabel = !!this.colorLabelMap[this.selectedColor];
         const colorErrorMessage = this.showColorError ? html`<div class="error-message">ERROR: Please select a color for the annotation.</div>` : html``;
         const labelErrorMessage = this.showLabelError ? html`<div class="error-message">ERROR: Please enter a label for the annotation.</div>` : html``;
 

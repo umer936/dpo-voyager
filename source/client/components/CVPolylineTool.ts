@@ -126,6 +126,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
     }
 
     protected onColorChanged(event: CustomEvent) {
+        console.log("onColorChanged CVPolylineTool.ts");
         const { color } = event.detail;
         const document = this.activeDocument;
         if (document) {
@@ -135,9 +136,11 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
             const b = parseInt(rgb.substring(4, 6), 16) / 255;
             const newColor = new Color(r, g, b);
     
-            // Assuming polyline.ins.color is a property object
             document.setup.polyline.ins.color.value = newColor.toArray();
+            console.log("document.setup.polyline.ins.color.value", document.setup.polyline.ins.color.value);
         }
+
+        this.requestUpdate();
     }
 
     protected onUpdate = () => {

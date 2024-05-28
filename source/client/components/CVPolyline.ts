@@ -76,6 +76,8 @@ export default class CVPolyline extends CObject3D {
 
         // Listen for changes to the color input
         this.ins.color.on("value", this.onColorChanged);
+
+        console.log("Event listener for color changes registered");
     }
 
     dispose() {
@@ -270,7 +272,9 @@ export default class CVPolyline extends CObject3D {
     }
 
     protected onColorChanged = () => {
+        console.log("onColorChanged CVPolyline.ts");
         const color = new Color().fromArray(this.ins.color.value);
+        console.log("color", color);
 
         this.lines.forEach(line => {
             (line.material as MeshLineMaterial).color.copy(color);
