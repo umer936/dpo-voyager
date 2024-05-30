@@ -1,6 +1,6 @@
 import { Matrix3, Vector3, Box3, Group, BufferGeometry, Color, Mesh } from "three";
 import CObject3D, { Node, types, IPointerEvent } from "@ff/scene/components/CObject3D";
-import { IPolyline } from "client/schema/setup";
+import { IPolylines } from "client/schema/setup";
 import Pin from "../utils/Pin";
 import CVModel2 from "./CVModel2";
 import CVScene from "client/components/CVScene";
@@ -76,8 +76,6 @@ export default class CVPolyline extends CObject3D {
 
         // Listen for changes to the color input
         this.ins.color.on("value", this.onColorChanged);
-
-        console.log("Event listener for color changes registered");
     }
 
     dispose() {
@@ -152,20 +150,27 @@ export default class CVPolyline extends CObject3D {
         return true;
     }
 
-    fromData(data: IPolyline) {
-        this.ins.copyValues({
-            visible: data.enabled, // TODO: should probably be visible instead of enabled
+    // fromData(data: IPolyline) {
+    //     this.ins.copyValues({
+    //         visible: data.enabled, 
+    //     });
+    // }
+
+    toData(): IPolylines {
+        return this.polylines.map(polyline => {
+            const points = polyline.pins.map(pin => {
+                return {
+                    position: [pin.position.x, pin.position.y, pin.position.z]
+                };
+            });
+            
+            return {
+                label: polyline.label,
+                points: points
+            };
         });
     }
-
-    toData(): IPolyline {
-        const ins = this.ins;
-
-        return {
-            enabled: ins.visible.cloneValue()
-        };
-    }
-
+    
     protected endPolyline() {
         if (this.pins.length > 0) {
             this.polylines.push({ pins: [...this.pins], lines: [...this.lines], label: this.ins.label.value });
@@ -272,9 +277,7 @@ export default class CVPolyline extends CObject3D {
     }
 
     protected onColorChanged = () => {
-        console.log("onColorChanged CVPolyline.ts");
         const color = new Color().fromArray(this.ins.color.value);
-        console.log("color", color);
 
         this.lines.forEach(line => {
             (line.material as MeshLineMaterial).color.copy(color);

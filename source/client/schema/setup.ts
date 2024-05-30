@@ -46,7 +46,7 @@ export interface ISetup
     floor?: IFloor;
     grid?: IGrid;
     tape?: ITape;
-    polyline?: IPolyline;
+    polylines?: IPolylines;
     slicer?: ISlicer;
     tours?: ITours;
     snapshots?: ISnapshots;
@@ -158,13 +158,17 @@ export interface ITape
     endDirection: number[];*/
 }
 
+export type IPolylines = IPolyline[];
+
+export interface IPoint
+{
+    position: number[];
+}
+
 export interface IPolyline
 {
-    enabled: boolean;
-    /*startPosition: number[];
-    startDirection: number[];
-    endPosition: number[];
-    endDirection: number[];*/
+    label: string;
+    points: IPoint[];
 }
 
 export interface ISlicer
