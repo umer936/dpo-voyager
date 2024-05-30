@@ -24,6 +24,7 @@ import CVRenderTool from "../components/CVRenderTool";
 import CVEnvironmentTool from "../components/CVEnvironmentTool";
 import CVLightTool from "../components/CVLightTool";
 import CVTapeTool from "../components/CVTapeTool";
+import CVNodeInfoTool from "../components/CVNodeInfoTool";
 import CVSliceTool from "../components/CVSliceTool";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,7 @@ export default class NVTools extends Node
         this.createComponent(CVEnvironmentTool);
         this.createComponent(CVLightTool);
         this.createComponent(CVTapeTool);
+        this.createComponent(CVNodeInfoTool);
         this.createComponent(CVSliceTool);
     }
 }
