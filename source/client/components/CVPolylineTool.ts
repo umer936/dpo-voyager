@@ -47,6 +47,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         const enabled = polyline.ins.enabled;
         const state = polyline.outs.state.value;
         const language = document.setup.language;
+        let colorLabelMap = polyline.colorLabelMap;
 
         let text;
 
@@ -63,7 +64,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         const colorPickerPanel = enabled.value ? html`
         <div class="sv-section">
             <div class="sv-tool-controls">
-                <sv-property-labeled-color .property=${polyline.ins.color} @color-change=${this.onColorChanged} @label-change=${this.onLabelChange}></sv-property-labeled-color>
+                <sv-property-labeled-color .property=${polyline.ins.color} .colorLabelMap=${colorLabelMap} @color-change=${this.onColorChanged} @label-change=${this.onLabelChange}></sv-property-labeled-color>
             </div>
         </div>
         ` : '';

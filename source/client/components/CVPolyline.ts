@@ -17,6 +17,10 @@ const _vec3up = new Vector3(0, 1, 0);
 
 export enum EPolylineState { SetStart, SetNext }
 
+interface ColorLabelMap {
+    [color: string]: string;
+}
+
 export default class CVPolyline extends CObject3D {
     static readonly typeName: string = "CVPolyline";
     static readonly text: string = "Polyline";
@@ -38,6 +42,7 @@ export default class CVPolyline extends CObject3D {
 
     ins = this.addInputs<CObject3D, typeof CVPolyline.polylineIns>(CVPolyline.polylineIns);
     outs = this.addOutputs<CObject3D, typeof CVPolyline.polylineOuts>(CVPolyline.polylineOuts);
+    colorLabelMap: ColorLabelMap = {};
 
     get settingProperties() {
         return [
