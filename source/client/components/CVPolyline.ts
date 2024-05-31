@@ -8,6 +8,7 @@ import { EUnitType } from "client/schema/common";
 import unitScaleFactor from "client/utils/unitScaleFactor";
 import { getMeshTransform } from "client/utils/Helpers";
 import { MeshLine, MeshLineMaterial, MeshLineRaycast } from "../utils/THREE.meshline.js";
+import CVTape from "./CVTape";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -106,7 +107,7 @@ export default class CVPolyline extends CObject3D {
     }
 
     update(context) {
-        const { pins, lines, polylines, ins } = this;
+        const { pins, lines, ins } = this;
 
         if (ins.enabled.changed) {
             ins.visible.setValue(ins.enabled.value);
@@ -198,6 +199,9 @@ export default class CVPolyline extends CObject3D {
 
     protected onPointerUp(event: IPointerEvent) {
         if (event.isDragging || !event.component || !event.component.is(CVModel2) || this.ins.label.value == "") {
+            return;
+        }
+        if (CVTape.tapeEnabled) {
             return;
         }
 

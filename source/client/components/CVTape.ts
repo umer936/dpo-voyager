@@ -65,6 +65,7 @@ export default class CVTape extends CObject3D
 
     ins = this.addInputs<CObject3D, typeof CVTape.tapeIns>(CVTape.tapeIns);
     outs = this.addOutputs<CObject3D, typeof CVTape.tapeOuts>(CVTape.tapeOuts);
+    static tapeEnabled: boolean;
 
     get settingProperties() {
         return [
@@ -149,6 +150,7 @@ export default class CVTape extends CObject3D
         const { startPin, endPin, line, ins } = this;
 
         if (ins.enabled.changed) {
+            CVTape.tapeEnabled = ins.enabled.value;
             ins.visible.setValue(ins.enabled.value);
         }
 
@@ -168,6 +170,7 @@ export default class CVTape extends CObject3D
 
         // if tape is enabled, listen for pointer events to set tape start/end
         if (ins.enabled.changed) {
+            CVTape.tapeEnabled = ins.enabled.value;
             if (ins.enabled.value) {
                 this.system.on<IPointerEvent>("pointer-up", this.onPointerUp, this);
                 this.annotationView.ins.visible.setValue(this.outs.distance.value > 0);

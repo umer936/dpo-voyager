@@ -4,7 +4,7 @@ import "../ui/PropertyColor";
 import "../ui/PropertyLabeledColor";
 
 import CVDocument from "./CVDocument";
-import { EPolylineState } from "./CVPolyline";
+import CVPolyline, { EPolylineState } from "./CVPolyline";
 
 import CVTool, { ToolView, customElement, html } from "./CVTool";
 import { Color, LineBasicMaterial } from "three";
