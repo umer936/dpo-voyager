@@ -240,6 +240,7 @@ export default class UberPBRMaterial extends MeshPhysicalMaterial
                 this.transparent = false;
                 this.depthWrite = true;
                 break;
+                
             case EShaderMode.DipDirection:
                 this._paramCopy = {
                     blending: this.blending,

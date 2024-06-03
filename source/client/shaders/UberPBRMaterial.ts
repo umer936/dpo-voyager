@@ -224,8 +224,8 @@ export default class UberPBRMaterial extends MeshStandardMaterial
                 this.normalMap = null;
                 this.defines["OBJECTSPACE_NORMALMAP"] = false;
                 break;
+
             case EShaderMode.Dip:
-                // Assigning normals to dip for now
                 this._paramCopy = {
                     blending: this.blending,
                     transparent: this.transparent,
@@ -236,6 +236,7 @@ export default class UberPBRMaterial extends MeshStandardMaterial
                 this.transparent = false;
                 this.depthWrite = true;
                 break;
+                
             case EShaderMode.DipDirection:
                 this._paramCopy = {
                     blending: this.blending,
