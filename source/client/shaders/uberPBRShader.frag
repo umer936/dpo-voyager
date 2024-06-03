@@ -273,9 +273,9 @@ void main() {
 		float rad_to_deg = 180.0 / PI;
 		float theta = atan(normal_dip_dir.x, normal_dip_dir.y) * rad_to_deg;
 		float dipDir = theta;
-		if (normal_dip_dir.x > 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) {
+		if ((normal_dip_dir.x > 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) || (normal_dip_dir.x < 0.0 && normal_dip_dir.y < 0.0 && normal_dip_dir.z < 0.0)) {
 			// No adjustment needed
-		} else if (normal_dip_dir.x < 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) {
+		} else if ((normal_dip_dir.x < 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) || (normal_dip_dir.x > 0.0 && normal_dip_dir.y < 0.0 && normal_dip_dir.z < 0.0)) {
 			dipDir += 360.0;
 		} else {
 			dipDir += 180.0;
