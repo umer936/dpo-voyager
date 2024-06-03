@@ -93,4 +93,5 @@ void main() {
 #ifdef MODE_NORMALS
     vNormal = normal;
 #endif
+
 }

@@ -63,7 +63,6 @@ uniform float opacity;
 
 varying vec3 vViewPosition;
 
-
 #include <common>
 #include <packing>
 #include <dithering_pars_fragment>
@@ -256,4 +255,31 @@ void main() {
     #ifdef MODE_XRAY
         gl_FragColor = vec4(vec3(0.4, 0.7, 1.0) * vIntensity, 1.0);
     #endif
+
+	#ifdef MODE_DIP
+		vec3 normal_dip = normalize(vNormal);
+
+		float hypoteneuse = sqrt(normal_dip.x * normal_dip.x + normal_dip.y * normal_dip.y);
+		float rad_to_deg = 180.0 / PI;
+
+		float dip = abs(atan(hypoteneuse / normal_dip.z) * rad_to_deg);
+		float normalizedDip = clamp(dip / 90.0, 0.0, 1.0);
+
+		gl_FragColor = vec4(vec3(normalizedDip), 1.0);
+	#endif
+
+	#ifdef MODE_DIP_DIR
+		vec3 normal_dip_dir = normalize(vNormal);
+		float rad_to_deg = 180.0 / PI;
+		float theta = atan(normal_dip_dir.x, normal_dip_dir.y) * rad_to_deg;
+		float dipDir = theta;
+		if (normal_dip_dir.x > 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) {
+			// No adjustment needed
+		} else if (normal_dip_dir.x < 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) {
+			dipDir += 360.0;
+		} else {
+			dipDir += 180.0;
+		}
+		gl_FragColor = vec4(vec3(dipDir / 360.0), 1.0); // Normalize to [0,1] range
+	#endif
 }
