@@ -47,6 +47,7 @@ export interface ISetup
     grid?: IGrid;
     tape?: ITape;
     polylines?: IPolylines;
+    nodeInfo?: INodeInfo;
     slicer?: ISlicer;
     tours?: ITours;
     snapshots?: ISnapshots;
@@ -151,6 +152,15 @@ export interface IAudio
 }
 
 export interface ITape
+{
+    enabled: boolean;
+    /*startPosition: number[];
+    startDirection: number[];
+    endPosition: number[];
+    endDirection: number[];*/
+}
+
+export interface INodeInfo
 {
     enabled: boolean;
     /*startPosition: number[];

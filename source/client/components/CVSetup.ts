@@ -30,6 +30,7 @@ import CVFloor from "./CVFloor";
 import CVGrid from "./CVGrid";
 import CVTape from "./CVTape";
 import CVPolyline from "./CVPolyline";
+import CVNodeInfo from "./CVNodeInfo";
 import CVSlicer from "./CVSlicer";
 import CVTours from "./CVTours";
 import CVSnapshots from "./CVSnapshots";
@@ -68,6 +69,7 @@ export default class CVSetup extends Component
         "grid": CVGrid,
         "tape": CVTape,
         "polyline": CVPolyline,
+        "nodeInfo": CVNodeInfo,
         "slicer": CVSlicer,
         "tours": CVTours,
         "audio": CVAudioManager
@@ -89,6 +91,7 @@ export default class CVSetup extends Component
     grid: CVGrid;
     tape: CVTape;
     polyline: CVPolyline;
+    nodeInfo: CVNodeInfo;
     slicer: CVSlicer;
     tours: CVTours;
     snapshots: CVSnapshots;

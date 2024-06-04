@@ -66,6 +66,7 @@ import CVTape from "../components/CVTape";
 import CVPolyline from "../components/CVPolyline";
 import CVSlicer from "../components/CVSlicer";
 import CVTours from "../components/CVTours";
+import CVNodeInfo from "../components/CVNodeInfo";
 import CVSnapshots from "../components/CVSnapshots";
 import CVEnvironment from "../components/CVEnvironment";
 import CVARManager from "../components/CVARManager";
@@ -135,6 +136,7 @@ const types = [
     CVGrid,
     CVTape,
     CVPolyline,
+    CVNodeInfo,
     CVSlicer,
     CVTours,
     CVSnapshots,
