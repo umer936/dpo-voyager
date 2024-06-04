@@ -173,13 +173,13 @@ export default class MainView extends CustomElement
     protected disconnected()
     {
         this.storeLayout();
-        localStorage.set("voyager-story", MainView.stateKey, this.state);
+        //localStorage.set("voyager-story", MainView.stateKey, this.state);
     }
 
     protected onUnload()
     {
         this.storeLayout();
-        localStorage.set("voyager-story", MainView.stateKey, this.state);
+        //localStorage.set("voyager-story", MainView.stateKey, this.state);
     }
 
     protected onTaskMode(mode: ETaskMode)
@@ -190,7 +190,7 @@ export default class MainView extends CustomElement
 
     protected storeLayout()
     {
-        const state = this.state;
+        /*const state = this.state;
         const expertMode = this.taskProvider.expertMode;
 
         if (expertMode) {
@@ -198,7 +198,7 @@ export default class MainView extends CustomElement
         }
         else {
             state.regularLayout = this.dockView.getLayout();
-        }
+        }*/
     }
 
     protected restoreLayout()
@@ -234,13 +234,21 @@ export default class MainView extends CustomElement
                 }]
             }, {
                 type: "stack",
-                size: 0.65,
+                size: 0.35,
                 activePanelIndex: 0,
                 panels: [{
                     contentId: "task",
                     text: "Task"
                 }]
-            }]
+            }, /*{
+                type: "stack",
+                size: 0.3,
+                activePanelIndex: 0,
+                panels: [{
+                    contentId: "target-editor",
+                    text: "Paint on Texture"
+                }]
+            }*/]
         }, {
             type: "strip",
             direction: "vertical",
@@ -253,7 +261,7 @@ export default class MainView extends CustomElement
                     contentId: "explorer",
                     text: "Explorer"
                 }]
-            }, {
+            }, /*{
                 type: "stack",
                 size: 0.25,
                 activePanelIndex: 0,
@@ -264,10 +272,13 @@ export default class MainView extends CustomElement
                     contentId: "tour-editor",
                     text: "Tour Editor"
                 }, {
+                    contentId: "target-editor",
+                    text: "Target Editor"
+                }, {
                     contentId: "notes",
                     text: "Note Editor"
                 }]
-            }]
+            }*/]
         }]
     };
 
@@ -324,6 +335,9 @@ export default class MainView extends CustomElement
                 }, {
                     contentId: "tour-editor",
                     text: "Tour Editor"
+                }, {
+                    contentId: "target-editor",
+                    text: "Target Editor"
                 }, {
                     contentId: "notes",
                     text: "Note Editor"
