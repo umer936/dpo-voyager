@@ -62,24 +62,26 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         this.statusMsg = text;
 
         const colorPickerPanel = enabled.value ? html`
-        <div class="sv-section">
-            <div class="sv-tool-controls">
-                <sv-property-labeled-color .property=${polyline.ins.color} .colorLabelMap=${colorLabelMap} @color-change=${this.onColorChanged} @label-change=${this.onLabelChange}></sv-property-labeled-color>
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
+                <div class="sv-tool-controls">
+                    <sv-property-labeled-color .property=${polyline.ins.color} .colorLabelMap=${colorLabelMap} @color-change=${this.onColorChanged} @label-change=${this.onLabelChange}></sv-property-labeled-color>
+                </div>
             </div>
-        </div>
         ` : '';
 
         return html`
-            ${colorPickerPanel}
-            <div class="sv-section">
-                <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
-                <div class="sv-tool-controls">
-                    <sv-property-boolean .property=${enabled} .language=${language} name=${language.getLocalizedString("Polyline Tool")}></sv-property-boolean>
-                    <div class="sv-property-view">
-                        <div class="ff-string" aria-live="polite" aria-atomic="true"></div>
-                    </div>
+${colorPickerPanel}
+        <div class="sv-section">
+            <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
+            <div class="sv-tool-controls">
+                <sv-property-boolean .property=${enabled} .language=${language} name=${language.getLocalizedString("Polyline Tool")}></sv-property-boolean>
+                <div class="sv-property-view">
+                    <label class="ff-label ff-off p">&nbsp;</label>
+                    <div class="ff-string" aria-live="polite" aria-atomic="true"></div>
                 </div>
             </div>
+        </div>
         `;
     }
 
