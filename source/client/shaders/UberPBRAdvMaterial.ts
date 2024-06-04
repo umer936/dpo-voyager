@@ -76,6 +76,8 @@ export default class UberPBRMaterial extends MeshPhysicalMaterial
             "OBJECTSPACE_NORMALMAP": false,
             "MODE_NORMALS": false,
             "MODE_XRAY": false,
+            "MODE_DIP" : false,
+            "MODE_DIP_DIR" : false,
             "CUT_PLANE": false,
             "USE_ZONEMAP": false,
         };

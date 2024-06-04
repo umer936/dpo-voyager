@@ -62,6 +62,7 @@ uniform float opacity;
 #endif
 
 varying vec3 vViewPosition;
+varying vec3 vWorldNormal;
 
 #include <common>
 #include <packing>
@@ -257,7 +258,7 @@ void main() {
     #endif
 
 	#ifdef MODE_DIP
-		vec3 normal_dip = normalize(vNormal);
+		vec3 normal_dip = normalize(vWorldNormal);
 		float hypoteneuse = sqrt((normal_dip.x * normal_dip.x) + (normal_dip.y * normal_dip.y));
 		float rad_to_deg = 180.0 / PI;
 
@@ -281,7 +282,7 @@ void main() {
 
 
 	#ifdef MODE_DIP_DIR
-		vec3 normal_dip_dir = normalize(vNormal);
+		vec3 normal_dip_dir = normalize(vWorldNormal);
 		float rad_to_deg = 180.0 / PI;
 		float theta = atan(normal_dip_dir.x, normal_dip_dir.y) * rad_to_deg;
 		float dipDir = theta;
