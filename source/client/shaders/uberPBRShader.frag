@@ -62,7 +62,7 @@ uniform float opacity;
 #endif
 
 varying vec3 vViewPosition;
-
+varying vec3 vWorldNormal;
 
 #include <common>
 #include <packing>
@@ -256,4 +256,60 @@ void main() {
     #ifdef MODE_XRAY
         gl_FragColor = vec4(vec3(0.4, 0.7, 1.0) * vIntensity, 1.0);
     #endif
+
+	#ifdef MODE_DIP
+		vec3 normal_dip = normalize(vWorldNormal);
+		float hypoteneuse = sqrt((normal_dip.x * normal_dip.x) + (normal_dip.y * normal_dip.y));
+		float rad_to_deg = 180.0 / PI;
+
+		float dip = abs(atan(hypoteneuse / normal_dip.z) * rad_to_deg);
+
+		// Normalize dip to [0,1] range
+		float normalizedDip = dip / 90.0;
+
+		// Define the colors for interpolation
+		vec3 color;
+		if (normalizedDip < 0.3333) {
+			color = mix(vec3(0.533, 0.012, 0.0), vec3(1.0, 0.267, 0.0), normalizedDip * 3.0);
+		} else if (normalizedDip < 0.6666) {
+			color = mix(vec3(1.0, 0.267, 0.0), vec3(1.0, 0.988, 0.0), (normalizedDip - 0.3333) * 3.0);
+		} else {
+			color = mix(vec3(1.0, 0.988, 0.0), vec3(1.0, 1.0, 1.0), (normalizedDip - 0.6666) * 3.0);
+		}
+
+		gl_FragColor = vec4(color, 1.0);
+	#endif
+
+
+	#ifdef MODE_DIP_DIR
+		vec3 normal_dip_dir = normalize(vWorldNormal);
+		float rad_to_deg = 180.0 / PI;
+		float theta = atan(normal_dip_dir.x, normal_dip_dir.y) * rad_to_deg;
+		float dipDir = theta;
+		
+		if ((normal_dip_dir.x > 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) || (normal_dip_dir.x < 0.0 && normal_dip_dir.y < 0.0 && normal_dip_dir.z < 0.0)) {
+			// No adjustment needed
+		} else if ((normal_dip_dir.x < 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) || (normal_dip_dir.x > 0.0 && normal_dip_dir.y < 0.0 && normal_dip_dir.z < 0.0)) {
+			dipDir += 360.0;
+		} else {
+			dipDir += 180.0;
+		}
+		
+		// Normalize to [0,1] range
+		float normalizedDipDir = dipDir / 360.0;
+
+		// Define the colors for interpolation
+		vec3 color;
+		if (normalizedDipDir < 0.25) {
+			color = mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), normalizedDipDir * 4.0);
+		} else if (normalizedDipDir < 0.5) {
+			color = mix(vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), (normalizedDipDir - 0.25) * 4.0);
+		} else if (normalizedDipDir < 0.75) {
+			color = mix(vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), (normalizedDipDir - 0.5) * 4.0);
+		} else {
+			color = mix(vec3(0.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0), (normalizedDipDir - 0.75) * 4.0);
+		}
+
+		gl_FragColor = vec4(color, 1.0);
+	#endif
 }

@@ -82,8 +82,10 @@ export default class TaskBar extends SystemView
         const language = this.language;
         const saveName = language.getLocalizedString(taskMode !== ETaskMode.Standalone ? "Save" : "Download");
         return html`
-            <img class="sv-story-logo" src=${this.assetReader.getSystemAssetUrl("images/voyager-75grey.svg")} alt="Logo"/>
-            <div class="sv-mode ff-text">${taskModeText}</div>
+            <!--<img class="sv-story-logo" src=${this.assetReader.getSystemAssetUrl("images/voyager-75grey.svg")} alt="Logo"/>-->
+            <img class="sv-story-logo" src="images/voyager-75grey.svg" alt="Logo"/>
+            
+            <div class="sv-mode ff-text">Story Mode ${taskModeText}</div>
             <div class="sv-spacer"></div>
             <div class="sv-divider"></div>
             <div class="ff-flex-row ff-group" @click=${this.onClickTask}>

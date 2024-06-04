@@ -154,6 +154,9 @@
                 },
                 "receiveShadow": {
                     "type": "boolean"
+                },
+                "autoSize": {
+                    "type": "boolean"
                 }
             }
         },
@@ -185,6 +188,23 @@
                 },
                 "endDirection": {
                     "$ref": "./common.schema.json#/definitions/vector3"
+                }
+            }
+        },
+        "polylines": {
+            "type": "array",
+            "items" : {
+                "type": "object",
+                "properties": {
+                    "points": {
+                        "type" : "array",
+                        "items" : {
+                            "$ref": "./common.schema.json#/definitions/vector3"
+                        }
+                    },
+                    "label" : {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -334,6 +354,9 @@
         },
         "tape": {
             "$ref": "#/definitions/tape"
+        },
+        "polylines": {
+            "$ref": "#/definitions/polylines"
         },
         "slicer": {
             "$ref": "#/definitions/slicer"

@@ -23,6 +23,9 @@ import CVTaskProvider from "../components/CVTaskProvider";
 
 import CVSettingsTask from "../components/CVSettingsTask";
 import CVPoseTask from "../components/CVPoseTask";
+
+import CVNormalsTask from "../components/CVNormalsTask";
+
 import CVCaptureTask from "../components/CVCaptureTask";
 import CVAnnotationsTask from "../components/CVAnnotationsTask";
 import CVArticlesTask from "../components/CVArticlesTask";
@@ -46,6 +49,7 @@ const types = [
     CVTaskProvider,
     CVSettingsTask,
     CVPoseTask,
+    CVNormalsTask,
     CVCaptureTask,
     CVAnnotationsTask,
     CVArticlesTask,

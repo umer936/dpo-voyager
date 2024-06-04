@@ -76,6 +76,8 @@ export default class UberPBRMaterial extends MeshPhysicalMaterial
             "OBJECTSPACE_NORMALMAP": false,
             "MODE_NORMALS": false,
             "MODE_XRAY": false,
+            "MODE_DIP" : false,
+            "MODE_DIP_DIR" : false,
             "CUT_PLANE": false,
             "USE_ZONEMAP": false,
         };
@@ -145,6 +147,8 @@ export default class UberPBRMaterial extends MeshPhysicalMaterial
 
         this.defines["MODE_NORMALS"] = false;
         this.defines["MODE_XRAY"] = false;
+        this.defines["MODE_DIP"] = false;
+        this.defines["MODE_DIP_DIR"] = false;
         this.defines["OBJECTSPACE_NORMALMAP"] = !!(this.normalMap && this._objectSpaceNormalMap);
 
         this.side = this.defines["CUT_PLANE"] ? DoubleSide : this.side;
@@ -225,6 +229,30 @@ export default class UberPBRMaterial extends MeshPhysicalMaterial
                 this.emissiveMap = null;
                 this.normalMap = null;
                 this.defines["OBJECTSPACE_NORMALMAP"] = false;
+                break;
+
+            case EShaderMode.Dip:
+                this._paramCopy = {
+                    blending: this.blending,
+                    transparent: this.transparent,
+                    depthWrite: this.depthWrite,
+                };
+                this.defines["MODE_DIP"] = true;
+                this.blending = NoBlending;
+                this.transparent = false;
+                this.depthWrite = true;
+                break;
+                
+            case EShaderMode.DipDirection:
+                this._paramCopy = {
+                    blending: this.blending,
+                    transparent: this.transparent,
+                    depthWrite: this.depthWrite,
+                };
+                this.defines["MODE_DIP_DIR"] = true;
+                this.blending = NoBlending;
+                this.transparent = false;
+                this.depthWrite = true;
                 break;
         }
     }

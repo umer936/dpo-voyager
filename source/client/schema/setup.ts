@@ -19,8 +19,8 @@ import { ELanguageType, TLanguageType } from "./common";
  */
 
 
-export type TShaderMode = "Default" | "Clay" | "XRay" | "Normals" | "Wireframe";
-export enum EShaderMode { Default, Clay, XRay, Normals, Wireframe }
+export type TShaderMode = "Default" | "Clay" | "XRay" | "Normals" | "Wireframe" | "Dip" | "Dip Direction";
+export enum EShaderMode { Default, Clay, XRay, Normals, Wireframe, Dip, DipDirection }
 
 export type TBackgroundStyle = "Solid" | "LinearGradient" | "RadialGradient";
 export enum EBackgroundStyle { Solid, LinearGradient, RadialGradient }
@@ -46,6 +46,8 @@ export interface ISetup
     floor?: IFloor;
     grid?: IGrid;
     tape?: ITape;
+    polylines?: IPolylines;
+    nodeInfo?: INodeInfo;
     slicer?: ISlicer;
     tours?: ITours;
     snapshots?: ISnapshots;
@@ -125,6 +127,7 @@ export interface IFloor
     color: number[];
     opacity: number;
     receiveShadow: boolean;
+    autoSize: boolean;
 }
 
 export interface IGrid
@@ -155,6 +158,28 @@ export interface ITape
     startDirection: number[];
     endPosition: number[];
     endDirection: number[];*/
+}
+
+export interface INodeInfo
+{
+    enabled: boolean;
+    /*startPosition: number[];
+    startDirection: number[];
+    endPosition: number[];
+    endDirection: number[];*/
+}
+
+export type IPolylines = IPolyline[];
+
+export interface IPoint
+{
+    position: number[];
+}
+
+export interface IPolyline
+{
+    label: string;
+    points: IPoint[];
 }
 
 export interface ISlicer

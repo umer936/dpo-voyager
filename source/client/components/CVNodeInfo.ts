@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, Box3Helper, BufferAttribute } from "three";
+import { Matrix3, Vector3, Box3, Line, Group, BufferGeometry, LineBasicMaterial, BufferAttribute } from "three";
 
 import CObject3D, { Node, types, IPointerEvent } from "@ff/scene/components/CObject3D";
 
-import { ITape } from "client/schema/setup";
+import { INodeInfo } from "client/schema/setup";
 
 import Pin from "../utils/Pin";
 import CVModel2 from "./CVModel2";
@@ -37,16 +37,16 @@ const _vec3a = new Vector3();
 const _vec3b = new Vector3();
 const _vec3up = new Vector3(0, 1, 0);
 
-export enum ETapeState { SetStart, SetEnd }
+export enum ENodeInfoState { SetStart, SetEnd }
 
-export default class CVTape extends CObject3D
+export default class CVNodeInfo extends CObject3D
 {
-    static readonly typeName: string = "CVTape";
+    static readonly typeName: string = "CVNodeInfo";
 
-    static readonly text: string = "Tape";
+    static readonly text: string = "NodeInfo";
     static readonly icon: string = "";
 
-    protected static readonly tapeIns = {
+    protected static readonly nodeInfoIns = {
         startPosition: types.Vector3("Start.Position"),
         startDirection: types.Vector3("Start.Direction"),
         endPosition: types.Vector3("End.Position"),
@@ -54,18 +54,17 @@ export default class CVTape extends CObject3D
         boundingBox: types.Object("Scene.BoundingBox", Box3),
         globalUnits: types.Enum("Model.GlobalUnits", EUnitType, EUnitType.cm),
         localUnits: types.Enum("Model.LocalUnits", EUnitType, EUnitType.cm),
-        enabled: types.Boolean("Tape.Enabled", false),
+        enabled: types.Boolean("NodeInfo.Enabled", false),
     };
 
-    protected static readonly tapeOuts = {
-        state: types.Enum("Tape.State", ETapeState),
-        distance: types.Number("Tape.Distance"),
+    protected static readonly nodeInfoOuts = {
+        state: types.Enum("NodeInfo.State", ENodeInfoState),
+        distance: types.Number("NodeInfo.Distance"),
         unitScale: types.Number("UnitScale", { preset: 1, precision: 5 })
     };
 
-    ins = this.addInputs<CObject3D, typeof CVTape.tapeIns>(CVTape.tapeIns);
-    outs = this.addOutputs<CObject3D, typeof CVTape.tapeOuts>(CVTape.tapeOuts);
-    static tapeEnabled: boolean;
+    ins = this.addInputs<CObject3D, typeof CVNodeInfo.nodeInfoIns>(CVNodeInfo.nodeInfoIns);
+    outs = this.addOutputs<CObject3D, typeof CVNodeInfo.nodeInfoOuts>(CVNodeInfo.nodeInfoOuts);
 
     get settingProperties() {
         return [
@@ -150,7 +149,6 @@ export default class CVTape extends CObject3D
         const { startPin, endPin, line, ins } = this;
 
         if (ins.enabled.changed) {
-            CVTape.tapeEnabled = ins.enabled.value;
             ins.visible.setValue(ins.enabled.value);
         }
 
@@ -160,7 +158,7 @@ export default class CVTape extends CObject3D
         if (ins.boundingBox.changed && ins.boundingBox.value) {
             ins.boundingBox.value.getSize(_vec3a);
             const radius = _vec3a.length() * 0.5;
-            
+
             startPin.scale.setScalar(radius * 0.003);
             startPin.updateMatrix();
 
@@ -168,9 +166,8 @@ export default class CVTape extends CObject3D
             endPin.updateMatrix();
         }
 
-        // if tape is enabled, listen for pointer events to set tape start/end
+        // if nodeinfo is enabled, listen for pointer events to set nodeinfo start/end
         if (ins.enabled.changed) {
-            CVTape.tapeEnabled = ins.enabled.value;
             if (ins.enabled.value) {
                 this.system.on<IPointerEvent>("pointer-up", this.onPointerUp, this);
                 this.annotationView.ins.visible.setValue(this.outs.distance.value > 0);
@@ -201,7 +198,7 @@ export default class CVTape extends CObject3D
             this.updateUnitScale();
         }
 
-        // update tape start point
+        // update nodeinfo start point
         if (ins.startPosition.changed || ins.startDirection.changed) {
             startPin.position.fromArray(ins.startPosition.value);
             _vec3a.fromArray(ins.startDirection.value);
@@ -216,7 +213,7 @@ export default class CVTape extends CObject3D
             this.annotationView.ins.visible.setValue(false);
         }
 
-        // update tape end point
+        // update nodeinfo end point
         if (ins.endPosition.changed || ins.endDirection.changed) {
             endPin.position.fromArray(ins.endPosition.value);
             _vec3a.fromArray(ins.endDirection.value);
@@ -232,16 +229,16 @@ export default class CVTape extends CObject3D
             // update distance between measured points
             _vec3a.fromArray(ins.startPosition.value);
             _vec3b.fromArray(ins.endPosition.value);
-            const tapeLength = _vec3a.distanceTo(_vec3b);
-            this.outs.distance.setValue(tapeLength);
+            const nodeInfoLength = _vec3a.distanceTo(_vec3b);
+            this.outs.distance.setValue(nodeInfoLength);
 
             // update distance label
             const data = this.label.data;
             data.position = [(positions[0]+positions[3])/2.0,(positions[1]+positions[4])/2.0,(positions[2]+positions[5])/2.0];
             const units = this.ins.globalUnits.getOptionText();
-            this.label.title = tapeLength.toFixed(2) + " " + units;
+            this.label.title = nodeInfoLength.toFixed(2) + " " + units;
             this.annotationView.updateAnnotation(this.label, true);
-            if(tapeLength > 0 && this.ins.visible.value) {
+            if(nodeInfoLength > 0 && this.ins.visible.value) {
                 this.annotationView.ins.visible.setValue(true);
             }
         }
@@ -249,7 +246,7 @@ export default class CVTape extends CObject3D
         return true;
     }
 
-    fromData(data: ITape)
+    fromData(data: INodeInfo)
     {
         this.ins.copyValues({
             visible: data.enabled,   // TODO: should probably be visible instead of enabled
@@ -260,7 +257,7 @@ export default class CVTape extends CObject3D
         });
     }
 
-    toData(): ITape
+    toData(): INodeInfo
     {
         const ins = this.ins;
 
@@ -288,13 +285,17 @@ export default class CVTape extends CObject3D
         const worldMatrix = event.object3D.matrixWorld;
         _mat3.getNormalMatrix(worldMatrix);
 
-        const position = event.view.pickPosition(event, bounds).applyMatrix4(worldMatrix); 
+        const position = event.view.pickPosition(event, bounds).applyMatrix4(worldMatrix);
         const normal = event.view.pickNormal(event).applyMatrix3(_mat3).normalize();
 
+        // maybe texture?
+
+        console.log('3:13PM');
+        console.table([position, normal]);
         // update pins and measurement line
         const { startPin, endPin, line, ins, outs } = this;
 
-        if (outs.state.value === ETapeState.SetStart) {
+        if (outs.state.value === ENodeInfoState.SetStart) {
             position.toArray(ins.startPosition.value);
             normal.toArray(ins.startDirection.value);
             ins.startPosition.set();
@@ -304,7 +305,7 @@ export default class CVTape extends CObject3D
             endPin.visible = false;
             line.visible = false;
 
-            outs.state.setValue(ETapeState.SetEnd);
+            outs.state.setValue(ENodeInfoState.SetEnd);
         }
         else {
             position.toArray(ins.endPosition.value);
@@ -312,12 +313,12 @@ export default class CVTape extends CObject3D
             ins.endPosition.set();
             ins.endDirection.set();
 
-            // set end position of tape
+            // set end position of nodeinfo
             startPin.visible = true;
             endPin.visible = true;
             line.visible = true;
 
-            outs.state.setValue(ETapeState.SetStart);
+            outs.state.setValue(ENodeInfoState.SetStart);
         }
     }
 

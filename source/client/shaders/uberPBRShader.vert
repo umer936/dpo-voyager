@@ -2,6 +2,7 @@
 //#define STANDARD
 
 varying vec3 vViewPosition;
+varying vec3 vWorldNormal;
 
 #if defined(USE_TRANSMISSION) || defined(CUT_PLANE)
 
@@ -93,4 +94,8 @@ void main() {
 #ifdef MODE_NORMALS
     vNormal = normal;
 #endif
+
+	// Transform the normal to world space
+    vec4 worldNormal = modelMatrix * vec4(normal, 0.0);
+    vWorldNormal = normalize(worldNormal.xyz);
 }

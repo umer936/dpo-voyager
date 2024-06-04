@@ -18,6 +18,7 @@
 import CVSettingsTask from "../components/CVSettingsTask";
 import CVPoseTask from "../components/CVPoseTask";
 import CVCaptureTask from "../components/CVCaptureTask";
+import CVNormalsTask from "../components/CVNormalsTask";
 import CVAnnotationsTask from "../components/CVAnnotationsTask";
 import CVDerivativesTask from "../components/CVDerivativesTask";
 import CVArticlesTask from "../components/CVArticlesTask";
@@ -32,44 +33,48 @@ export default {
     [ETaskMode.Edit]: [
         CVPoseTask,
         CVCaptureTask,
-        CVDerivativesTask,
-        CVAnnotationsTask,
-        CVArticlesTask,
-        CVToursTask,
-        CVAudioTask,
+        CVNormalsTask,
+        //CVDerivativesTask,
+        //CVAnnotationsTask,
+        //CVArticlesTask,
+        //CVToursTask,
+        //CVAudioTask,
         CVSettingsTask,
     ],
     [ETaskMode.QC]: [
         CVPoseTask,
         CVCaptureTask,
-        CVDerivativesTask,
+        CVNormalsTask,
+        //CVDerivativesTask,
         CVSettingsTask,
     ],
     [ETaskMode.Authoring]: [
-        CVAnnotationsTask,
-        CVArticlesTask,
-        CVToursTask,
-        CVAudioTask,
+        //CVAnnotationsTask,
+        //CVArticlesTask,
+        //CVToursTask,
+       //CVAudioTask,
         CVSettingsTask,
     ],
     [ETaskMode.Expert]: [
         CVPoseTask,
         CVCaptureTask,
-        CVDerivativesTask,
-        CVAnnotationsTask,
-        CVArticlesTask,
-        CVToursTask,
-        CVAudioTask,
+        CVNormalsTask,
+        //CVDerivativesTask,
+        //CVAnnotationsTask,
+        //CVArticlesTask,
+        //CVToursTask,
+        //CVAudioTask,
         CVSettingsTask,
     ],
     [ETaskMode.Standalone]: [
         CVPoseTask,
         CVCaptureTask,
-        CVDerivativesTask,
-        CVAnnotationsTask,
-        CVArticlesTask,
-        CVToursTask,
-        CVAudioTask,
+        CVNormalsTask,
+        //CVDerivativesTask,
+        //CVAnnotationsTask,
+        //CVArticlesTask,
+        //CVToursTask,
+        //CVAudioTask,
         CVSettingsTask,
     ]
 }
