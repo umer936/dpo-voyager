@@ -256,16 +256,14 @@ void main() {
         gl_FragColor = vec4(vec3(0.4, 0.7, 1.0) * vIntensity, 1.0);
     #endif
 
-	float rad_to_deg = 180.0 / PI;
-
 	#ifdef MODE_DIP
 		float hypoteneuse = sqrt((normal.x * normal.x) + (normal.y * normal.y));
 		float dip = abs(atan(hypoteneuse / normal.z) * rad_to_deg);
 
 		// Normalize dip to [0,1] range
-		float normalizedDip = dip / 90.0;
+		float normalizedDip = dip / (PI /2.0f));
 
-		// Define the colors for interpolation
+		// Map to colors for shader
 		vec3 color;
 		if (normalizedDip < 0.3333) {
 			color = mix(vec3(0.533, 0.012, 0.0), vec3(1.0, 0.267, 0.0), normalizedDip * 3.0);
@@ -282,15 +280,16 @@ void main() {
 	#ifdef MODE_DIP_DIR
 		float Nsign = normal.z < 0.0f ? -1.0f : 1.0f;
 
-		float dipDir_rad = atan(Nsign * normal.x, Nsign * normal.y);
-		if (dipDir_rad < 0.0f)
+		float dipDir = atan(Nsign * normal.x, Nsign * normal.y);
+		if (dipDir < 0.0f)
 		{
-			dipDir_rad += (2.0f * PI);
+			dipDir += (2.0f * PI);
 		}
 		
 		// Normalize to [0,1] range
-		float normalizedDipDir = (dipDir_rad * rad_to_deg) / 360.0;
+		float normalizedDipDir = (dipDir_rad) / (2.0f * PI));
 
+		// Map to colors for shader
 		vec3 color;
 		if (normalizedDipDir < 0.25) {
 			color = mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), normalizedDipDir * 4.0);
