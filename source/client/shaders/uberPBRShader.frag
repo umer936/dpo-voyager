@@ -258,10 +258,10 @@ void main() {
 
 	#ifdef MODE_DIP
 		float hypoteneuse = sqrt((normal.x * normal.x) + (normal.y * normal.y));
-		float dip = abs(atan(hypoteneuse / normal.z) * rad_to_deg);
+		float dip = abs(atan(hypoteneuse / normal.z));
 
 		// Normalize dip to [0,1] range
-		float normalizedDip = dip / (PI /2.0f));
+		float normalizedDip = dip / (PI / 2.0f);
 
 		// Map to colors for shader
 		vec3 color;
@@ -287,7 +287,7 @@ void main() {
 		}
 		
 		// Normalize to [0,1] range
-		float normalizedDipDir = (dipDir_rad) / (2.0f * PI));
+		float normalizedDipDir = dipDir / (2.0f * PI);
 
 		// Map to colors for shader
 		vec3 color;
