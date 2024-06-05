@@ -10,6 +10,13 @@ uniform vec3 emissive;
 uniform float roughness;
 uniform float metalness;
 uniform float opacity;
+uniform vec3 dipColor1;
+uniform vec3 dipColor2;
+uniform vec3 dipColor3;
+uniform vec3 dipDirColor1;
+uniform vec3 dipDirColor2;
+uniform vec3 dipDirColor3;
+uniform vec3 dipDirColor4;
 
 #ifdef IOR
 	uniform float ior;
@@ -266,11 +273,11 @@ void main() {
 		// Map to colors for shader
 		vec3 color;
 		if (normalizedDip < 0.3333) {
-			color = mix(vec3(0.533, 0.012, 0.0), vec3(1.0, 0.267, 0.0), normalizedDip * 3.0);
+			color = mix(dipColor1, dipColor2, normalizedDip * 3.0);
 		} else if (normalizedDip < 0.6666) {
-			color = mix(vec3(1.0, 0.267, 0.0), vec3(1.0, 0.988, 0.0), (normalizedDip - 0.3333) * 3.0);
+			color = mix(dipColor2, dipColor3, (normalizedDip - 0.3333) * 3.0);
 		} else {
-			color = mix(vec3(1.0, 0.988, 0.0), vec3(1.0, 1.0, 1.0), (normalizedDip - 0.6666) * 3.0);
+			color = mix(dipColor3, vec3(1.0, 1.0, 1.0), (normalizedDip - 0.6666) * 3.0);
 		}
 
 		gl_FragColor = vec4(color, 1.0);
@@ -292,13 +299,13 @@ void main() {
 		// Map to colors for shader
 		vec3 color;
 		if (normalizedDipDir < 0.25) {
-			color = mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), normalizedDipDir * 4.0);
+			color = mix(dipDirColor1, dipDirColor2, normalizedDipDir * 4.0);
 		} else if (normalizedDipDir < 0.5) {
-			color = mix(vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), (normalizedDipDir - 0.25) * 4.0);
+			color = mix(dipDirColor2, dipDirColor3, (normalizedDipDir - 0.25) * 4.0);
 		} else if (normalizedDipDir < 0.75) {
-			color = mix(vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), (normalizedDipDir - 0.5) * 4.0);
+			color = mix(dipDirColor3, dipDirColor4, (normalizedDipDir - 0.5) * 4.0);
 		} else {
-			color = mix(vec3(0.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0), (normalizedDipDir - 0.75) * 4.0);
+			color = mix(dipDirColor4, dipDirColor1, (normalizedDipDir - 0.75) * 4.0);
 		}
 
 		gl_FragColor = vec4(color, 1.0);
