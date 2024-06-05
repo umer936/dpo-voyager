@@ -43,7 +43,8 @@ export default class Logo extends CustomElement
             ${Logo.defaultFull}
         </object></div>`;*/
 
-        const logoFull = html`<div class="sv-logo-full"><object style="height: 100%; width:100%" data="images/logo-full.svg" type="image/svg+xml" alt="Logo">
+        const swriUrl = 'https://porky.space.swri.edu/digitaloutcrop/images/logo-full.svg';
+        const logoFull = html`<div class="sv-logo-full"><object style="height: 100%; width:100%" data="${swriUrl}" type="image/svg+xml" alt="Logo">
            ${Logo.defaultFull}
         </object></div>`;
 

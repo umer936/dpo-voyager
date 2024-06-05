@@ -81,9 +81,10 @@ export default class TaskBar extends SystemView
         const exitButtonVisible = taskMode !== ETaskMode.Standalone;
         const language = this.language;
         const saveName = language.getLocalizedString(taskMode !== ETaskMode.Standalone ? "Save" : "Download");
+        const swriUrl = 'https://porky.space.swri.edu/digitaloutcrop/images/voyager-75grey.svg';
         return html`
             <!--<img class="sv-story-logo" src=${this.assetReader.getSystemAssetUrl("images/voyager-75grey.svg")} alt="Logo"/>-->
-            <img class="sv-story-logo" src="images/voyager-75grey.svg" alt="Logo"/>
+            <img class="sv-story-logo" src="${swriUrl}" alt="Logo"/>
             
             <div class="sv-mode ff-text">Story Mode ${taskModeText}</div>
             <div class="sv-spacer"></div>
