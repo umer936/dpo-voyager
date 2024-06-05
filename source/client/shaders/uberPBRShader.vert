@@ -91,11 +91,8 @@ void main() {
     vWorldPosition = worldPosition.xyz / worldPosition.w;
 #endif
 
-#ifdef MODE_NORMALS
+#if defined(MODE_NORMALS) || defined(MODE_DIP) || defined(MODE_DIP_DIR)
     vNormal = normal;
 #endif
 
-	// Transform the normal to world space
-    vec4 worldNormal = modelMatrix * vec4(normal, 0.0);
-    vWorldNormal = normalize(worldNormal.xyz);
 }

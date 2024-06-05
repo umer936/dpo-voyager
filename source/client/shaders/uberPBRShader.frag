@@ -62,7 +62,6 @@ uniform float opacity;
 #endif
 
 varying vec3 vViewPosition;
-varying vec3 vWorldNormal;
 
 #include <common>
 #include <packing>
@@ -257,12 +256,11 @@ void main() {
         gl_FragColor = vec4(vec3(0.4, 0.7, 1.0) * vIntensity, 1.0);
     #endif
 
-	#ifdef MODE_DIP
-		vec3 normal_dip = normalize(vWorldNormal);
-		float hypoteneuse = sqrt((normal_dip.x * normal_dip.x) + (normal_dip.y * normal_dip.y));
-		float rad_to_deg = 180.0 / PI;
+	float rad_to_deg = 180.0 / PI;
 
-		float dip = abs(atan(hypoteneuse / normal_dip.z) * rad_to_deg);
+	#ifdef MODE_DIP
+		float hypoteneuse = sqrt((normal.x * normal.x) + (normal.y * normal.y));
+		float dip = abs(atan(hypoteneuse / normal.z) * rad_to_deg);
 
 		// Normalize dip to [0,1] range
 		float normalizedDip = dip / 90.0;
@@ -282,23 +280,17 @@ void main() {
 
 
 	#ifdef MODE_DIP_DIR
-		vec3 normal_dip_dir = normalize(vWorldNormal);
-		float rad_to_deg = 180.0 / PI;
-		float theta = atan(normal_dip_dir.x, normal_dip_dir.y) * rad_to_deg;
-		float dipDir = theta;
-		
-		if ((normal_dip_dir.x > 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) || (normal_dip_dir.x < 0.0 && normal_dip_dir.y < 0.0 && normal_dip_dir.z < 0.0)) {
-			// No adjustment needed
-		} else if ((normal_dip_dir.x < 0.0 && normal_dip_dir.y > 0.0 && normal_dip_dir.z > 0.0) || (normal_dip_dir.x > 0.0 && normal_dip_dir.y < 0.0 && normal_dip_dir.z < 0.0)) {
-			dipDir += 360.0;
-		} else {
-			dipDir += 180.0;
+		float Nsign = normal.z < 0.0f ? -1.0f : 1.0f;
+
+		float dipDir_rad = atan(Nsign * normal.x, Nsign * normal.y);
+		if (dipDir_rad < 0.0f)
+		{
+			dipDir_rad += (2.0f * PI);
 		}
 		
 		// Normalize to [0,1] range
-		float normalizedDipDir = dipDir / 360.0;
+		float normalizedDipDir = (dipDir_rad * rad_to_deg) / 360.0;
 
-		// Define the colors for interpolation
 		vec3 color;
 		if (normalizedDipDir < 0.25) {
 			color = mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), normalizedDipDir * 4.0);
