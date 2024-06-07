@@ -16,11 +16,17 @@
  */
 
 import "../ui/PropertyOptions";
+import "../ui/PropertyColor";
 
 import CVDocument from "./CVDocument";
 import CVViewer from "./CVViewer";
 
 import CVTool, { customElement, html, ToolView } from "./CVTool";
+import { EShaderMode } from "client/schema/setup";
+
+import { property } from "@ff/ui/CustomElement";
+
+export type ColorChangeListener = (index: number, color: string) => void;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +49,7 @@ export default class CVRenderTool extends CVTool
 export class RenderToolView extends ToolView<CVRenderTool>
 {
     protected viewer: CVViewer = null;
+    @property({ type: Boolean }) showDipColors = false;
 
     protected firstConnected()
     {
@@ -63,12 +70,38 @@ export class RenderToolView extends ToolView<CVRenderTool>
         const shader = viewer.ins.shader;
         const language = document.setup.language;
 
-        return html`<div class="sv-section"><ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
-            <div class="sv-tool-controls">
-                <sv-property-options .property=${shader} .language=${language} name=${language.getLocalizedString("Material")}></sv-property-options>
+        const colorLabels = ["0 degrees", "30 degrees", "60 degrees", "90 degrees"];
+
+        const colorPickerPanel = this.showDipColors ? html`
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
+                <div class="sv-tool-controls">
+                    ${colorLabels.map((label, index) => html`
+                        <label>${label}</label>
+                        <sv-property-color .property=${viewer.ins[`customDipColor${index + 1}`]} .hideLabel=${true} @color-change=${(event: CustomEvent) => this.onDipColorChange(index + 1, event)}></sv-property-color>
+                    `)}
+                </div>
             </div>
-        </div>`;
+        ` : '';
+
+        return html`
+            ${colorPickerPanel}
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
+                <div class="sv-tool-controls">
+                    <sv-property-options .property=${shader} .language=${language} name=${language.getLocalizedString("Material")}></sv-property-options>
+                </div>
+            </div>
+        `;
     }
+
+    protected onDipColorChange(index: number, event: CustomEvent) {
+        const color = event.detail.color;
+        this.viewer.setCustomDipColor(index, color); // Pass color to CVViewer
+    }
+
+    // Define a property to hold the callback
+    protected colorChangeListener: ColorChangeListener = null;
 
     protected onActiveDocument(previous: CVDocument, next: CVDocument)
     {
@@ -80,7 +113,14 @@ export class RenderToolView extends ToolView<CVRenderTool>
         if (next) {
             this.viewer = next.setup.viewer;
             this.viewer.ins.shader.on("value", this.onUpdate, this);
+            this.checkDipMode();
         }
+    }
+
+    protected checkDipMode() {
+        const shaderMode = this.viewer.ins.shader.value;
+        this.showDipColors = shaderMode === EShaderMode.Dip;
+        this.requestUpdate();
     }
 
     protected async setFocus()
@@ -94,5 +134,9 @@ export class RenderToolView extends ToolView<CVRenderTool>
     {
         this.parentElement.dispatchEvent(new CustomEvent("close"));
         event.stopPropagation();
+    }
+
+    protected onUpdate() {
+        this.checkDipMode();
     }
 }

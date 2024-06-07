@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ACESFilmicToneMapping, NoToneMapping, Mesh } from "three";
+import { ACESFilmicToneMapping, NoToneMapping, Mesh, Color, Vector3 } from "three";
 
 import Component, { IComponentEvent, types } from "@ff/graph/Component";
 import CRenderer from "@ff/scene/components/CRenderer";
@@ -52,7 +52,12 @@ export default class CVViewer extends Component
         gamma: types.Number("Renderer.Gamma", 2),
         quality: types.Enum("Models.Quality", EDerivativeQuality, EDerivativeQuality.High),
         isWallMountAR: types.Boolean("AR.IsWallMount", false),
-        arScale: types.Number("AR.Scale", 1.0)
+        arScale: types.Number("AR.Scale", 1.0),
+        customDipColor1: types.Vector3("Shader.CustomDipColor1", [0.533, 0.012, 0.0]),
+        customDipColor2: types.Vector3("Shader.CustomDipColor2", [1.0, 0.267, 0.0]),
+        customDipColor3: types.Vector3("Shader.CustomDipColor3", [1.0, 0.988, 0.0]),
+        customDipColor4: types.Vector3("Shader.CustomDipColor3", [1.0, 1.0, 1.0]),
+        
     };
 
     protected static readonly outs = {
@@ -180,6 +185,60 @@ export default class CVViewer extends Component
         return true;
     }
 
+    setCustomDipColor(index: number, color: { x: number, y: number, z: number }) {
+        const vectorColor = this.vectorToVector3(color);
+        switch (index) {
+            case 1:
+                this.ins.customDipColor1.setValue(vectorColor.toArray());
+                break;
+            case 2:
+                this.ins.customDipColor2.setValue(vectorColor.toArray());
+                break;
+            case 3:
+                this.ins.customDipColor3.setValue(vectorColor.toArray());
+                break;
+            case 4:
+                this.ins.customDipColor4.setValue(vectorColor.toArray());
+                break;
+            default:
+                break;
+        }
+
+        this.refreshColors();
+    }
+    
+    vectorToVector3(color: { x: number, y: number, z: number }): Vector3 {
+        return new Vector3(color.x, color.y, color.z);
+    }
+    
+    protected refreshColors() {
+        const color1: Color = new Color().fromArray([
+            this.ins.customDipColor1.value[0],
+            this.ins.customDipColor1.value[1],
+            this.ins.customDipColor1.value[2]
+        ]);
+        const color2: Color = new Color().fromArray([
+            this.ins.customDipColor2.value[0],
+            this.ins.customDipColor2.value[1],
+            this.ins.customDipColor2.value[2]
+        ]);
+        const color3: Color = new Color().fromArray([
+            this.ins.customDipColor3.value[0],
+            this.ins.customDipColor3.value[1],
+            this.ins.customDipColor3.value[2]
+        ]);
+        const color4: Color = new Color().fromArray([
+            this.ins.customDipColor4.value[0],
+            this.ins.customDipColor4.value[1],
+            this.ins.customDipColor4.value[2]
+        ]);
+    
+        const models = this.getGraphComponents(CVModel2);
+        models.forEach(model => {
+            model.setDipColors(color1, color2, color3, color4);
+        });
+    }
+    
     // preRender(context)
     // {
     //     const qualityName = this.ins.quality.getOptionText();

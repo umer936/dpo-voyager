@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Vector3, Quaternion, Box3, Mesh, Group, Matrix4, Box3Helper, Object3D, FrontSide, BackSide, DoubleSide } from "three";
+import { Vector3, Quaternion, Box3, Mesh, Group, Matrix4, Box3Helper, Object3D, FrontSide, BackSide, DoubleSide, Color } from "three";
 
 import Notification from "@ff/ui/Notification";
 
@@ -513,6 +513,18 @@ export default class CVModel2 extends CObject3D
         const modelIndex = document.models.length;
         document.models.push(data);
         return modelIndex;
+    }
+
+    setDipColors(color1: Color, color2: Color, color3: Color, color4: Color) {
+        this.object3D.traverse((object) => {
+            if (object instanceof Mesh) {
+                const material = object.material as UberPBRMaterial;
+                if (material instanceof UberPBRMaterial) {
+                    // Assuming the material has a method to set dip colors
+                    material.setDipColors(color1, color2, color3, color4);
+                }
+            }
+        });
     }
 
     protected updateShader()

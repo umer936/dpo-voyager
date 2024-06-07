@@ -46,6 +46,7 @@ export default class UberPBRMaterial extends MeshStandardMaterial
         dipColor1: { value: Color },
         dipColor2: { value: Color },
         dipColor3: { value: Color },
+        dipColor4: { value: Color },
         dipDirColor1: { value: Color },
         dipDirColor2: { value: Color },
         dipDirColor3: { value: Color },
@@ -99,6 +100,7 @@ export default class UberPBRMaterial extends MeshStandardMaterial
                 dipColor1: { value: new Color(0.533, 0.012, 0.0) },
                 dipColor2: { value: new Color(1.0, 0.267, 0.0) },
                 dipColor3: { value: new Color(1.0, 0.988, 0.0) },
+                dipColor4: { value: new Color(1.0, 1.0, 1.0) },
                 dipDirColor1: { value: new Color(1.0, 0.0, 0.0) },
                 dipDirColor2: { value: new Color(1.0, 1.0, 0.0) },
                 dipDirColor3: { value: new Color(0.0, 1.0, 0.0) },
@@ -296,10 +298,11 @@ export default class UberPBRMaterial extends MeshStandardMaterial
         this.defines["USE_ZONEMAP"] = enabled;
     }
 
-    setDipColors(color1: Color, color2: Color, color3: Color) {
+    setDipColors(color1: Color, color2: Color, color3: Color, color4: Color) {
         this.uniforms.dipColor1.value = color1;
         this.uniforms.dipColor2.value = color2;
         this.uniforms.dipColor3.value = color3;
+        this.uniforms.dipColor4.value = color4;
         this.needsUpdate = true;
     }
     

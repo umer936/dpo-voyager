@@ -13,6 +13,7 @@ uniform float opacity;
 uniform vec3 dipColor1;
 uniform vec3 dipColor2;
 uniform vec3 dipColor3;
+uniform vec3 dipColor4;
 uniform vec3 dipDirColor1;
 uniform vec3 dipDirColor2;
 uniform vec3 dipDirColor3;
@@ -277,7 +278,7 @@ void main() {
 		} else if (normalizedDip < 0.6666) {
 			color = mix(dipColor2, dipColor3, (normalizedDip - 0.3333) * 3.0);
 		} else {
-			color = mix(dipColor3, vec3(1.0, 1.0, 1.0), (normalizedDip - 0.6666) * 3.0);
+			color = mix(dipColor3, dipColor4, (normalizedDip - 0.6666) * 3.0);
 		}
 
 		gl_FragColor = vec4(color, 1.0);

@@ -82,7 +82,7 @@ export default class PropertyColor extends CustomElement
         const name = this.name || property.name;
         const color = this.color.toString();
 
-        return html`<label class="ff-label ff-off">${name}</label>
+        return html`
             <input type="color" value="${color}" @change=${this.onColorChange}>
         `;
     }
@@ -91,6 +91,12 @@ export default class PropertyColor extends CustomElement
     {
         this.color = new Color((event.target as HTMLInputElement).value);
         this.property.setValue(this.color.toRGBArray());
+        this.dispatchEvent(new CustomEvent('color-change', {
+            detail: { color: this.color }, // Ensure `this.color` contains the correct color string
+            bubbles: true,
+            composed: true
+        }));
+        
     }
 
     protected onPropertyChange(value: number[])
