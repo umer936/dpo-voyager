@@ -71,28 +71,32 @@ export class RenderToolView extends ToolView<CVRenderTool>
         const language = document.setup.language;
 
         const colorLabels = ["0 degrees", "30 degrees", "60 degrees", "90 degrees"];
-
         const colorPickerPanel = this.showDipColors ? html`
-            <div class="sv-section">
-                <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
-                <div class="sv-tool-controls">
-                    ${colorLabels.map((label, index) => html`
-                        <label>${label}</label>
+        <div class="sv-section">
+            <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
+            <div class="sv-tool-controls">
+                ${colorLabels.map((label, index) => html`
+                <div class="color-picker-item">
+                    <label>${label}</label>
+                    <div class="color-picker-wrapper">
                         <sv-property-color .property=${viewer.ins[`customDipColor${index + 1}`]} .hideLabel=${true} @color-change=${(event: CustomEvent) => this.onDipColorChange(index + 1, event)}></sv-property-color>
-                    `)}
                 </div>
             </div>
-        ` : '';
+            
+                `)}
+            </div>
+        </div>
+    ` : '';
 
-        return html`
-            ${colorPickerPanel}
-            <div class="sv-section">
-                <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
-                <div class="sv-tool-controls">
-                    <sv-property-options .property=${shader} .language=${language} name=${language.getLocalizedString("Material")}></sv-property-options>
-                </div>
+    return html`
+        ${colorPickerPanel}
+        <div class="sv-section">
+            <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
+            <div class="sv-tool-controls">
+                <sv-property-options .property=${shader} .language=${language} name=${language.getLocalizedString("Material")}></sv-property-options>
             </div>
-        `;
+        </div>
+    `;
     }
 
     protected onDipColorChange(index: number, event: CustomEvent) {

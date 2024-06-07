@@ -1549,3 +1549,13 @@ $tour-entry-indent: 12px;
   z-index: 4;
   padding-top: 6px;
 }
+
+.color-picker-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.color-picker-item label {
+  margin-right: 0px; /* Adjust the margin as needed */
+}
