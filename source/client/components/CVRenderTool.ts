@@ -72,10 +72,17 @@ export class RenderToolView extends ToolView<CVRenderTool>
         const language = document.setup.language;
 
         const dipColorLabels = ["0 degrees", "30 degrees", "60 degrees", "90 degrees"];
+        const dipColors = [
+            this.vectorToRGBA(viewer.ins.customDipColor1.value),
+            this.vectorToRGBA(viewer.ins.customDipColor2.value),
+            this.vectorToRGBA(viewer.ins.customDipColor3.value),
+            this.vectorToRGBA(viewer.ins.customDipColor4.value),
+        ];
         const dipColorPickerPanel = this.showDipColors ? html`
             <div class="sv-section">
                 <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
                 <div class="sv-tool-controls">
+                    ${this.renderDipColorLegend(dipColors)}
                     ${dipColorLabels.map((label, index) => html`
                         <div class="color-picker-item">
                             <label>${label}</label>
@@ -89,10 +96,17 @@ export class RenderToolView extends ToolView<CVRenderTool>
         ` : '';
 
         const dipDirColorLabels = ["0 (360) degrees", "90 degrees", "180 degrees", "270 degrees"];
+        const dipDirColors = [
+            this.vectorToRGBA(viewer.ins.customDipDirColor1.value),
+            this.vectorToRGBA(viewer.ins.customDipDirColor2.value),
+            this.vectorToRGBA(viewer.ins.customDipDirColor3.value),
+            this.vectorToRGBA(viewer.ins.customDipDirColor4.value),
+        ];
         const dipDirColorPickerPanel = this.showDipDirColors ? html`
             <div class="sv-section">
                 <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
                 <div class="sv-tool-controls">
+                    ${this.renderDipDirColorLegend(dipDirColors)}
                     ${dipDirColorLabels.map((label, index) => html`
                         <div class="color-picker-item">
                             <label>${label}</label>
@@ -117,14 +131,25 @@ export class RenderToolView extends ToolView<CVRenderTool>
         `;
     }
 
+    protected vectorToRGBA(vector: number[]): string {
+        if (!vector || (vector.length !== 3 && vector.length !== 4)) {
+            console.error("Invalid vector format:", vector);
+            return "rgba(0, 0, 0, 1)"; // Fallback color in case of invalid vector
+        }
+        const [r, g, b, a = 1] = vector; // Default alpha to 1 if not provided
+        return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+    }
+
     protected onDipColorChange(index: number, event: CustomEvent) {
         const color = event.detail.color;
         this.viewer.setCustomDipColor(index, color); // Pass color to CVViewer
+        this.requestUpdate();
     }
 
     protected onDipDirColorChange(index: number, event: CustomEvent) {
         const color = event.detail.color;
         this.viewer.setCustomDipDirectionColor(index, color); // Pass color to CVViewer
+        this.requestUpdate();
     }
 
     // Define a property to hold the callback
@@ -166,5 +191,38 @@ export class RenderToolView extends ToolView<CVRenderTool>
 
     protected onUpdate() {
         this.checkDipMode();
+    }
+
+    protected renderDipColorLegend(colors: string[]) {
+        const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
+        return html`
+            <div class="color-legend">
+                <div class="color-legend-title">Dip Color Legend (0 to 90 degrees)</div>
+                <div class="color-legend-gradient" style="background: ${gradient};"></div>
+                <div class="color-legend-labels">
+                    <span>0</span>
+                    <span>30</span>
+                    <span>60</span>
+                    <span>90</span>
+                </div>
+            </div>
+        `;
+    }
+
+    protected renderDipDirColorLegend(colors: string[]) {
+        const gradient = `linear-gradient(to right, ${colors.concat(colors[0]).join(", ")})`;
+        return html`
+            <div class="color-legend">
+                <div class="color-legend-title">Dip Direction Color Legend (0 to 360 degrees)</div>
+                <div class="color-legend-gradient" style="background: ${gradient};"></div>
+                <div class="color-legend-labels">
+                    <span>0</span>
+                    <span>90</span>
+                    <span>180</span>
+                    <span>270</span>
+                    <span>360</span>
+                </div>
+            </div>
+        `;
     }
 }

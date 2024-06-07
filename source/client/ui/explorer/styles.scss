@@ -1554,8 +1554,31 @@ $tour-entry-indent: 12px;
   display: flex;
   align-items: center;
   margin-right: 20px;
+  margin-left: 25px;
 }
 
 .color-picker-item label {
   margin-right: 0px; /* Adjust the margin as needed */
 }
+
+.color-legend {
+  margin-top: 1em;
+  text-align: center;
+}
+
+.color-legend-title {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.color-legend-gradient {
+  height: 20px;
+  border: 1px solid #ccc;
+  margin-bottom: 0.5em;
+}
+
+.color-legend-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
