@@ -527,6 +527,18 @@ export default class CVModel2 extends CObject3D
         });
     }
 
+    setDipDirectionColors(color1: Color, color2: Color, color3: Color, color4: Color) {
+        this.object3D.traverse((object) => {
+            if (object instanceof Mesh) {
+                const material = object.material as UberPBRMaterial;
+                if (material instanceof UberPBRMaterial) {
+                    // Assuming the material has a method to set dip colors
+                    material.setDipDirectionColors(color1, color2, color3, color4);
+                }
+            }
+        });
+    }
+
     protected updateShader()
     {
         const shader = this.ins.shader.getValidatedValue();

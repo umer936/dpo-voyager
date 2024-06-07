@@ -57,7 +57,10 @@ export default class CVViewer extends Component
         customDipColor2: types.Vector3("Shader.CustomDipColor2", [1.0, 0.267, 0.0]),
         customDipColor3: types.Vector3("Shader.CustomDipColor3", [1.0, 0.988, 0.0]),
         customDipColor4: types.Vector3("Shader.CustomDipColor3", [1.0, 1.0, 1.0]),
-        
+        customDipDirColor1: types.Vector3("Shader.CustomDipColor1", [1.0, 0.0, 0.0]),
+        customDipDirColor2: types.Vector3("Shader.CustomDipColor2", [1.0, 1.0, 0.0]),
+        customDipDirColor3: types.Vector3("Shader.CustomDipColor3", [0.0, 1.0, 0.0]),
+        customDipDirColor4: types.Vector3("Shader.CustomDipColor3", [0.0, 0.0, 1.0]),
     };
 
     protected static readonly outs = {
@@ -204,14 +207,36 @@ export default class CVViewer extends Component
                 break;
         }
 
-        this.refreshColors();
+        this.refreshDipColors();
+    }
+
+    setCustomDipDirectionColor(index: number, color: { x: number, y: number, z: number }) {
+        const vectorColor = this.vectorToVector3(color);
+        switch (index) {
+            case 1:
+                this.ins.customDipDirColor1.setValue(vectorColor.toArray());
+                break;
+            case 2:
+                this.ins.customDipDirColor2.setValue(vectorColor.toArray());
+                break;
+            case 3:
+                this.ins.customDipDirColor3.setValue(vectorColor.toArray());
+                break;
+            case 4:
+                this.ins.customDipDirColor4.setValue(vectorColor.toArray());
+                break;
+            default:
+                break;
+        }
+
+        this.refreshDipDirectionColors();
     }
     
     vectorToVector3(color: { x: number, y: number, z: number }): Vector3 {
         return new Vector3(color.x, color.y, color.z);
     }
     
-    protected refreshColors() {
+    protected refreshDipColors() {
         const color1: Color = new Color().fromArray([
             this.ins.customDipColor1.value[0],
             this.ins.customDipColor1.value[1],
@@ -236,6 +261,34 @@ export default class CVViewer extends Component
         const models = this.getGraphComponents(CVModel2);
         models.forEach(model => {
             model.setDipColors(color1, color2, color3, color4);
+        });
+    }
+
+    protected refreshDipDirectionColors() {
+        const color1: Color = new Color().fromArray([
+            this.ins.customDipDirColor1.value[0],
+            this.ins.customDipDirColor1.value[1],
+            this.ins.customDipDirColor1.value[2]
+        ]);
+        const color2: Color = new Color().fromArray([
+            this.ins.customDipDirColor2.value[0],
+            this.ins.customDipDirColor2.value[1],
+            this.ins.customDipDirColor2.value[2]
+        ]);
+        const color3: Color = new Color().fromArray([
+            this.ins.customDipDirColor3.value[0],
+            this.ins.customDipDirColor3.value[1],
+            this.ins.customDipDirColor3.value[2]
+        ]);
+        const color4: Color = new Color().fromArray([
+            this.ins.customDipDirColor4.value[0],
+            this.ins.customDipDirColor4.value[1],
+            this.ins.customDipDirColor4.value[2]
+        ]);
+    
+        const models = this.getGraphComponents(CVModel2);
+        models.forEach(model => {
+            model.setDipDirectionColors(color1, color2, color3, color4);
         });
     }
     

@@ -306,7 +306,7 @@ export default class UberPBRMaterial extends MeshStandardMaterial
         this.needsUpdate = true;
     }
     
-    setDipDirColors(color1: Color, color2: Color, color3: Color, color4: Color) {
+    setDipDirectionColors(color1: Color, color2: Color, color3: Color, color4: Color) {
         this.uniforms.dipDirColor1.value = color1;
         this.uniforms.dipDirColor2.value = color2;
         this.uniforms.dipDirColor3.value = color3;

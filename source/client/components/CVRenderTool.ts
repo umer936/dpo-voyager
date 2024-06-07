@@ -50,6 +50,7 @@ export class RenderToolView extends ToolView<CVRenderTool>
 {
     protected viewer: CVViewer = null;
     @property({ type: Boolean }) showDipColors = false;
+    @property({ type: Boolean }) showDipDirColors = false;
 
     protected firstConnected()
     {
@@ -70,38 +71,60 @@ export class RenderToolView extends ToolView<CVRenderTool>
         const shader = viewer.ins.shader;
         const language = document.setup.language;
 
-        const colorLabels = ["0 degrees", "30 degrees", "60 degrees", "90 degrees"];
-        const colorPickerPanel = this.showDipColors ? html`
-        <div class="sv-section">
-            <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
-            <div class="sv-tool-controls">
-                ${colorLabels.map((label, index) => html`
-                <div class="color-picker-item">
-                    <label>${label}</label>
-                    <div class="color-picker-wrapper">
-                        <sv-property-color .property=${viewer.ins[`customDipColor${index + 1}`]} .hideLabel=${true} @color-change=${(event: CustomEvent) => this.onDipColorChange(index + 1, event)}></sv-property-color>
+        const dipColorLabels = ["0 degrees", "30 degrees", "60 degrees", "90 degrees"];
+        const dipColorPickerPanel = this.showDipColors ? html`
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
+                <div class="sv-tool-controls">
+                    ${dipColorLabels.map((label, index) => html`
+                        <div class="color-picker-item">
+                            <label>${label}</label>
+                            <div class="color-picker-wrapper">
+                                <sv-property-color .property=${viewer.ins[`customDipColor${index + 1}`]} .hideLabel=${true} @color-change=${(event: CustomEvent) => this.onDipColorChange(index + 1, event)}></sv-property-color>
+                            </div>
+                        </div>
+                    `)}
                 </div>
             </div>
-            
-                `)}
-            </div>
-        </div>
-    ` : '';
+        ` : '';
 
-    return html`
-        ${colorPickerPanel}
-        <div class="sv-section">
-            <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
-            <div class="sv-tool-controls">
-                <sv-property-options .property=${shader} .language=${language} name=${language.getLocalizedString("Material")}></sv-property-options>
+        const dipDirColorLabels = ["0 (360) degrees", "90 degrees", "180 degrees", "270 degrees"];
+        const dipDirColorPickerPanel = this.showDipDirColors ? html`
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
+                <div class="sv-tool-controls">
+                    ${dipDirColorLabels.map((label, index) => html`
+                        <div class="color-picker-item">
+                            <label>${label}</label>
+                            <div class="color-picker-wrapper">
+                                <sv-property-color .property=${viewer.ins[`customDipDirColor${index + 1}`]} .hideLabel=${true} @color-change=${(event: CustomEvent) => this.onDipDirColorChange(index + 1, event)}></sv-property-color>
+                            </div>
+                        </div>
+                    `)}
+                </div>
             </div>
-        </div>
-    `;
+        ` : '';
+
+        return html`
+            ${dipColorPickerPanel}
+            ${dipDirColorPickerPanel}
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
+                <div class="sv-tool-controls">
+                    <sv-property-options .property=${shader} .language=${language} name=${language.getLocalizedString("Material")}></sv-property-options>
+                </div>
+            </div>
+        `;
     }
 
     protected onDipColorChange(index: number, event: CustomEvent) {
         const color = event.detail.color;
         this.viewer.setCustomDipColor(index, color); // Pass color to CVViewer
+    }
+
+    protected onDipDirColorChange(index: number, event: CustomEvent) {
+        const color = event.detail.color;
+        this.viewer.setCustomDipDirectionColor(index, color); // Pass color to CVViewer
     }
 
     // Define a property to hold the callback
@@ -124,6 +147,7 @@ export class RenderToolView extends ToolView<CVRenderTool>
     protected checkDipMode() {
         const shaderMode = this.viewer.ins.shader.value;
         this.showDipColors = shaderMode === EShaderMode.Dip;
+        this.showDipDirColors = shaderMode === EShaderMode.DipDirection;
         this.requestUpdate();
     }
 
