@@ -183,7 +183,6 @@ export default class CVPolyline extends CObject3D {
             if (this.pins.length > 0) {
                 const lastPin = this.pins[this.pins.length - 1];
                 lastPin.visible = false;
-                this.object3D.remove(lastPin);
             }
             this.pins = [];
             this.lines = [];
@@ -227,7 +226,6 @@ export default class CVPolyline extends CObject3D {
         if (pins.length > 0) {
             const lastPin = pins[pins.length - 1];
             lastPin.visible = false;
-            this.object3D.remove(lastPin);
         }
 
         const pin = new Pin();
@@ -239,7 +237,6 @@ export default class CVPolyline extends CObject3D {
         pin.scale.setScalar(.1);
         pin.updateMatrix();
         pins.push(pin);
-        this.object3D.add(pin);
 
         if (outs.state.value === EPolylineState.SetNext) {
             const points = [];
