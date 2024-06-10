@@ -48,6 +48,7 @@ export default class SceneView extends SystemView
 
     protected pointerEventsEnabled: boolean = false;
     protected measuring: boolean = false;
+    protected annotating: boolean = false;
 
     getView() : RenderQuadView
     {
@@ -142,6 +143,7 @@ export default class SceneView extends SystemView
         this.system.getMainComponent(CVDocumentProvider).activeComponent.setup.navigation.ins.pointerEnabled.on("value", this.enablePointerEvents, this);
         this.system.getComponent(CVOrbitNavigation).ins.keyNavActive.on("value", this.onKeyboardNavigation, this);
         this.system.getComponent(CVSetup).tape.ins.enabled.on("value", this.onMeasure, this);
+        this.system.getComponent(CVSetup).polyline.ins.enabled.on("value", this.onAnnotation, this);
     }
 
     protected disconnected()
@@ -149,6 +151,7 @@ export default class SceneView extends SystemView
         this.resizeObserver.disconnect();
 
         this.system.getComponent(CVSetup).tape.ins.enabled.off("value", this.onMeasure, this);
+        this.system.getComponent(CVSetup).polyline.ins.enabled.off("value", this.onAnnotation, this);
         this.system.getComponent(CVOrbitNavigation).ins.keyNavActive.off("value", this.onKeyboardNavigation, this);
         this.system.getMainComponent(CVDocumentProvider).activeComponent.setup.navigation.ins.pointerEnabled.off("value", this.enablePointerEvents, this);
 
@@ -229,6 +232,11 @@ export default class SceneView extends SystemView
     protected onMeasure() {
         this.measuring = this.system.getComponent(CVSetup).tape.ins.enabled.value;
         this.style.cursor = this.measuring ? "default" : "grab";
+    }
+
+    protected onAnnotation() {
+        this.annotating = this.system.getComponent(CVSetup).polyline.ins.enabled.value;
+        this.style.cursor = this.annotating ? "default" : "grab";
     }
 
     /*protected onResize()

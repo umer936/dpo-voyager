@@ -71,17 +71,16 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         ` : '';
 
         return html`
-${colorPickerPanel}
-        <div class="sv-section">
-            <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
-            <div class="sv-tool-controls">
-                <sv-property-boolean .property=${enabled} .language=${language} name=${language.getLocalizedString("Polyline Tool")}></sv-property-boolean>
-                <div class="sv-property-view">
-                    <label class="ff-label ff-off p">&nbsp;</label>
-                    <div class="ff-string" aria-live="polite" aria-atomic="true"></div>
+            ${colorPickerPanel}
+            <div class="sv-section">
+                <ff-button class="sv-section-lead" title=${language.getLocalizedString("Close Tool")} @click=${this.onClose} transparent icon="close"></ff-button>
+                <div class="sv-tool-controls">
+                    <sv-property-boolean .property=${enabled} .language=${language} name=${language.getLocalizedString("Polyline Tool")}></sv-property-boolean>
+                    <div class="sv-property-view">
+                        <div class="ff-string" aria-live="polite" aria-atomic="true"></div>
+                    </div>
                 </div>
             </div>
-        </div>
         `;
     }
 
