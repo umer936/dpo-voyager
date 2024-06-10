@@ -253,7 +253,7 @@ export default class CVPolyline extends CObject3D {
             // Adjusting material properties to avoid z-fighting
             const material = new MeshLineMaterial({
                 color: new Color().fromArray(ins.color.value),
-                lineWidth: 0.2,
+                lineWidth: 0.025,
                 polygonOffset: true,
                 polygonOffsetFactor: -1000,
                 polygonOffsetUnits: -1000
