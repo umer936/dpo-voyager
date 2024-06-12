@@ -66,6 +66,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
                 <ff-button class="sv-section-lead" transparent tabbingIndex="-1" icon="cog"></ff-button>
                 <div class="sv-tool-controls">
                     <sv-property-labeled-color .property=${polyline.ins.color} .colorLabelMap=${colorLabelMap} @color-change=${this.onColorChanged} @label-change=${this.onLabelChange}></sv-property-labeled-color>
+                    <button class="sv-undo-button" @click=${this.onUndoClick} title="Undo">Undo</button>
                 </div>
             </div>
         ` : '';
@@ -146,4 +147,8 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
     protected onUpdate = () => {
         this.requestUpdate();
     };
+
+    protected onUndoClick(event: MouseEvent) {
+        console.log("Undo button clicked");
+    }
 }

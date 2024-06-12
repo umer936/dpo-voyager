@@ -1550,6 +1550,9 @@ $tour-entry-indent: 12px;
   padding-top: 6px;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Custom CSS for digital outcrop features
+
 .color-picker-item {
   display: flex;
   align-items: center;
@@ -1580,5 +1583,27 @@ $tour-entry-indent: 12px;
 .color-legend-labels {
   display: flex;
   justify-content: space-between;
+}
+
+.sv-undo-button {
+  background-color: #f0f0f0; /* Light gray background */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  padding: 0.5em 1em; /* Padding */
+  font-size: 1em; /* Font size */
+  cursor: pointer; /* Pointer cursor */
+  display: inline-block; /* Inline block display */
+  text-align: center; /* Center text */
+  color: #000; /* Black text */
+  text-decoration: none; /* No underline */
+  margin-left: 50px;
+}
+
+.sv-undo-button:hover {
+  background-color: #e0e0e0; /* Darker gray on hover */
+}
+
+.sv-undo-button:active {
+  background-color: #d0d0d0; /* Even darker gray on click */
 }
 
