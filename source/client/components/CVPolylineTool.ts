@@ -33,6 +33,8 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
     protected firstConnected() {
         super.firstConnected();
         this.classList.add("sv-group", "sv-polyline-tool-view");
+
+        document.addEventListener("keydown", this.handleKeyDown);
     }
 
     protected render() {
@@ -118,6 +120,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
     protected onClose(event: MouseEvent) {
         this.parentElement.dispatchEvent(new CustomEvent("close"));
         event.stopPropagation();
+        document.removeEventListener("keydown", this.handleKeyDown);
     }
 
     protected onLabelChange(event: CustomEvent) {
@@ -152,4 +155,11 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         const document = this.activeDocument;
         document.setup.polyline.ins.undo.setValue(true);
     }
+
+    protected handleKeyDown = (event: KeyboardEvent) => {
+        // If Control (or Command) and Z keys are pressed simultaneously, run the undo code
+        if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+            this.onUndoClick(event);
+        }
+    };
 }
