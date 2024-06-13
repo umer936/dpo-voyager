@@ -137,7 +137,7 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
             const g = parseInt(rgb.substring(2, 4), 16) / 255;
             const b = parseInt(rgb.substring(4, 6), 16) / 255;
             const newColor = new Color(r, g, b);
-    
+
             document.setup.polyline.ins.color.value = newColor.toArray();
         }
 
@@ -148,7 +148,8 @@ export class PolylineToolView extends ToolView<CVPolylineTool> {
         this.requestUpdate();
     };
 
-    protected onUndoClick(event: MouseEvent) {
-        console.log("Undo button clicked");
+    onUndoClick(event) {
+        const document = this.activeDocument;
+        document.setup.polyline.ins.undo.setValue(true);
     }
 }

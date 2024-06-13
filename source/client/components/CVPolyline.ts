@@ -22,6 +22,12 @@ interface ColorLabelMap {
     [color: string]: string;
 }
 
+type Polyline = {
+    pins: Pin[];
+    lines: Mesh[];
+    label: string;
+};
+
 export default class CVPolyline extends CObject3D {
     static readonly typeName: string = "CVPolyline";
     static readonly text: string = "Polyline";
@@ -33,7 +39,8 @@ export default class CVPolyline extends CObject3D {
         globalUnits: types.Enum("Model.GlobalUnits", EUnitType, EUnitType.cm),
         localUnits: types.Enum("Model.LocalUnits", EUnitType, EUnitType.cm),
         color: types.Vector3("Polyline.Color", [1, 1, 1]), // Default color white
-        label: types.String("Polyline.Label", "") // Label property
+        label: types.String("Polyline.Label", ""), // Label property
+        undo: types.Boolean("Polyline.Undo", false)
     };
 
     protected static readonly polylineOuts = {
@@ -113,6 +120,10 @@ export default class CVPolyline extends CObject3D {
             ins.visible.setValue(ins.enabled.value);
         }
 
+        if (ins.undo.changed) {
+            this.handleUndoAction();
+        }
+
         super.update(context);
 
         // if tape is enabled, listen for pointer events to set polyline points
@@ -187,6 +198,61 @@ export default class CVPolyline extends CObject3D {
             this.pins = [];
             this.lines = [];
             this.outs.state.setValue(EPolylineState.SetStart);
+        }
+    }
+
+    getNumPins(): number {
+        return this.pins.length; // Return the number of pins in the pins array
+    }
+
+    getNumLines(): number {
+        return this.lines.length; // Return the number of lines in the lines array
+    }
+
+    getNumPolylines(): number {
+        return this.polylines.length; // Return the number of polylines in the polylines array
+    }
+
+    popPin(): Pin | undefined {
+        return this.pins.pop(); // Remove and return the last pin from the pins array
+    }
+
+    popLine(): Mesh | undefined {
+        return this.lines.pop(); // Remove and return the last line from the lines array
+    }
+
+    clearAllLines(polyline: Polyline)
+    {
+        polyline.lines.forEach(line => {
+            this.object3D.remove(line);
+        });
+    }
+
+    removeLastPolyline() {
+        const lastPolyline = this.popPolyline(); // Remove and return the last line from the lines array
+        this.clearAllLines(lastPolyline);
+    }
+
+    popPolyline(): Polyline | undefined {
+        return this.polylines.pop();
+    }
+
+    handleUndoAction() {
+        if (this.getNumPins() > 0) {
+            console.log("Attempting to remove last pin");
+            this.popPin();
+            if (this.getNumLines() > 0) {
+                console.log("Number of lines is " + this.getNumLines());
+                console.log("Attempting to remove last pin's line");
+                const lastLine = this.popLine();
+                console.log(lastLine);
+                this.object3D.remove(lastLine);
+            }
+        } else {
+            // If there are no points added yet, remove the last polyline added (if any)
+            if (this.getNumPolylines() > 0) {
+                this.removeLastPolyline();
+            }
         }
     }
 
