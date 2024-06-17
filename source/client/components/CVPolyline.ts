@@ -31,7 +31,7 @@ type Polyline = {
 export default class CVPolyline extends CObject3D {
     static readonly typeName: string = "CVPolyline";
     static readonly text: string = "Polyline";
-    static readonly icon: string = "";
+    static readonly icon: string = "annotate";
 
     protected static readonly polylineIns = {
         boundingBox: types.Object("Scene.BoundingBox", Box3),
@@ -189,7 +189,7 @@ export default class CVPolyline extends CObject3D {
     }
     
     protected endPolyline() {
-        if (this.pins.length > 0) {
+        if (this.pins.length > 1) {
             this.polylines.push({ pins: [...this.pins], lines: [...this.lines], label: this.ins.label.value });
             if (this.pins.length > 0) {
                 const lastPin = this.pins[this.pins.length - 1];
@@ -198,6 +198,15 @@ export default class CVPolyline extends CObject3D {
             this.pins = [];
             this.lines = [];
             this.outs.state.setValue(EPolylineState.SetStart);
+
+            // Dispatch custom event after handling undo action
+            console.log("POLY dispatching event");
+            const event = new CustomEvent("polyline-added", {
+                detail: {
+                    label: this.ins.label.value  // Include the label in the event detail
+                }
+            });
+            window.dispatchEvent(event);
         }
     }
 

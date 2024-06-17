@@ -97,7 +97,9 @@ class NodeTree extends Tree<NVNode>
         if (node.meta) {
             icons.push(html`<ff-icon class="sv-icon-meta" name=${node.meta.icon}></ff-icon>`);
         }
-
+        if (node.polyline) {
+            icons.push(html`<ff-icon class="sv-icon-meta" name=${node.polyline.icon}></ff-icon>`);
+        }
 
         return html`${icons}<div class="ff-text ff-ellipsis">${node.displayName}</div>`;
     }
@@ -117,6 +119,9 @@ class NodeTree extends Tree<NVNode>
         }
         if (treeNode.light) {
             return "sv-node-light";
+        }
+        if (treeNode.polyline) {
+            return "sv-node-polyline";
         }
         if (treeNode.camera) {
             return "sv-node-camera";

@@ -21,33 +21,64 @@ import "./DocumentList";
 import "./NodeTree";
 
 import CVTaskProvider from "../../components/CVTaskProvider";
+import CVDocumentProvider from "client/components/CVDocumentProvider";
+import CVPolyline from "client/components/CVPolyline";
+
+import NVNode from "client/nodes/NVNode";
+import CVMeta from "client/components/CVMeta";
 
 ////////////////////////////////////////////////////////////////////////////////
 
 @customElement("sv-navigator-panel")
-export default class NavigatorPanel extends SystemView
-{
+export default class NavigatorPanel extends SystemView {
+    private _firstPolyline: boolean = true;
+
     protected get taskProvider() {
         return this.system.getMainComponent(CVTaskProvider);
     }
 
-    protected firstConnected()
-    {
+    protected firstConnected() {
         this.classList.add("sv-panel", "sv-navigator-panel");
+
+        window.addEventListener("polyline-added", (event: CustomEvent) => {
+            const label = event.detail.label;
+            console.log("New polyline added with label:", label);
+            this.handlePolylineAdd(label);
+        });
     }
 
-    protected connected()
-    {
+    protected connected() {
         this.taskProvider.ins.mode.on("value", this.performUpdate, this);
     }
 
-    protected disconnected()
-    {
+    protected disconnected() {
         this.taskProvider.ins.mode.off("value", this.performUpdate, this);
     }
 
-    protected render()
-    {
+
+    protected handlePolylineAdd(label: String) {
+        const activeDoc = this.system.getMainComponent(CVDocumentProvider).activeComponent;
+        if (this._firstPolyline == true) {
+            let node = activeDoc.innerGraph.createCustomNode(NVNode);
+            let parent = activeDoc.root;
+            node.name = "Polylines";
+            parent.transform.addChild(node.transform);
+            this._firstPolyline = false;
+        }
+        if (!activeDoc.system.findNodeByName(label.toString(), NVNode)) {
+            let parentNode = activeDoc.innerGraph.createCustomNode(NVNode);
+            let parent = activeDoc.system.findNodeByName("Polylines") as NVNode;
+            parentNode.name = label.toString();
+            parent.transform.addChild(parentNode.transform);
+        }
+        let node = activeDoc.innerGraph.createCustomNode(NVNode);
+        node.createComponent(CVPolyline);
+        let parent = activeDoc.system.findNodeByName(label.toString()) as NVNode;
+        node.name = "Polyline #";
+        parent.transform.addChild(node.transform);
+    }
+
+    protected render() {
         const system = this.system;
         const expertMode = this.taskProvider.expertMode;
 
@@ -66,7 +97,7 @@ export default class NavigatorPanel extends SystemView
             <div class="ff-splitter-section ff-flex-column" style="flex-basis: 70%">
                 <div class="sv-panel-header">
                     <ff-icon name="hierarchy"></ff-icon>
-                    <div class="ff-text">Nodes</div>
+                    <div class="ff-text" style="flex-grow:1">Nodes</div>
                 </div>
                 <sv-node-tree class="ff-flex-item-stretch" .system=${system}></sv-node-tree>
             </div>`;

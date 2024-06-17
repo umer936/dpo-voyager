@@ -28,6 +28,7 @@ import { ICVLight, CLight } from "../components/lights/CVLight";
 import CVMeta from "../components/CVMeta";
 import CVModel2 from "../components/CVModel2";
 import CVScene from "../components/CVScene";
+import CVPolyline from "../components/CVPolyline";
 import { lightTypes } from "client/applications/coreTypes";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,6 +40,7 @@ export interface INodeComponents
     model?: boolean; // models
     camera?: boolean; // cameras
     light?: boolean; // lights
+    polyline?: boolean; // polylines
 }
 
 
@@ -60,6 +62,9 @@ export default class NVNode extends Node
     }
     get light() {
         return this.components.get(CLight, true) as ICVLight;
+    }
+    get polyline() {
+        return this.components.get(CVPolyline, true);
     }
     get scene() {
         return this.components.get(CVScene, true);
@@ -192,6 +197,9 @@ export default class NVNode extends Node
             return true;
         }
         if (components.light && (comps.has(CLight) || tf.hasChildComponents(CLight, true))) {
+            return true;
+        }
+        if (components.polyline && (comps.has(CVPolyline) || tf.hasChildComponents(CVPolyline, true))) {
             return true;
         }
 
