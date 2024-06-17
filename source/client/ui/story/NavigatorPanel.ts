@@ -42,7 +42,6 @@ export default class NavigatorPanel extends SystemView {
 
         window.addEventListener("polyline-added", (event: CustomEvent) => {
             const label = event.detail.label;
-            console.log("New polyline added with label:", label);
             this.handlePolylineAdd(label);
         });
     }
@@ -74,7 +73,8 @@ export default class NavigatorPanel extends SystemView {
         let node = activeDoc.innerGraph.createCustomNode(NVNode);
         node.createComponent(CVPolyline);
         let parent = activeDoc.system.findNodeByName(label.toString()) as NVNode;
-        node.name = "Polyline #";
+        let idx = parent.transform.children.length + 1;
+        node.name = "Polyline # " + idx.toString();
         parent.transform.addChild(node.transform);
     }
 
