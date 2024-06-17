@@ -98,13 +98,13 @@ export default class NavigatorPanel extends SystemView {
                 let pParent = activeDoc.system.findNodeByName("Polylines") as NVNode; 
                 pParent.transform.removeChild(parent.transform);
                 parent.dispose();
-                console.log("NAVPAN pParent children" + pParent.transform.children.length);
                 if (pParent.transform.children.length == 0)
                 {
                     let ppParent = activeDoc.root;
                     ppParent.transform.removeChild(pParent.transform);
                     pParent.dispose();
                 }
+                this._firstPolyline = true;
             }
         }
     }

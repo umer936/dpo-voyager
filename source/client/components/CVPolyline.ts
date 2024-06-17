@@ -250,7 +250,6 @@ export default class CVPolyline extends CObject3D {
             this.popPin();
             if (this.getNumLines() > 0) {
                 const lastLine = this.popLine();
-                console.log(lastLine);
                 this.object3D.remove(lastLine);
             }
         } else {
