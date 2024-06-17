@@ -32,7 +32,6 @@ import CVMeta from "client/components/CVMeta";
 @customElement("sv-navigator-panel")
 export default class NavigatorPanel extends SystemView {
     private _firstPolyline: boolean = true;
-
     protected get taskProvider() {
         return this.system.getMainComponent(CVTaskProvider);
     }
@@ -42,7 +41,14 @@ export default class NavigatorPanel extends SystemView {
 
         window.addEventListener("polyline-added", (event: CustomEvent) => {
             const label = event.detail.label;
-            this.handlePolylineAdd(label);
+            const numPolylines = event.detail.numPolylines;
+            this.handlePolylineAdd(label, numPolylines);
+        });
+
+        window.addEventListener("polyline-undone", (event: CustomEvent) => {
+            const label = event.detail.label;
+            const numPolylines = event.detail.numPolylines;
+            this.handlePolylineUndo(label, numPolylines);
         });
     }
 
@@ -55,7 +61,7 @@ export default class NavigatorPanel extends SystemView {
     }
 
 
-    protected handlePolylineAdd(label: String) {
+    protected handlePolylineAdd(label: String, numPolylines: number) {
         const activeDoc = this.system.getMainComponent(CVDocumentProvider).activeComponent;
         if (this._firstPolyline == true) {
             let node = activeDoc.innerGraph.createCustomNode(NVNode);
@@ -73,9 +79,34 @@ export default class NavigatorPanel extends SystemView {
         let node = activeDoc.innerGraph.createCustomNode(NVNode);
         node.createComponent(CVPolyline);
         let parent = activeDoc.system.findNodeByName(label.toString()) as NVNode;
-        let idx = parent.transform.children.length + 1;
-        node.name = "Polyline # " + idx.toString();
+        node.name = "Polyline # " + numPolylines.toString();
         parent.transform.addChild(node.transform);
+    }
+
+    protected handlePolylineUndo(label: String, numPolylines: number) {
+        const activeDoc = this.system.getMainComponent(CVDocumentProvider).activeComponent;
+        let parent = activeDoc.system.findNodeByName(label.toString()) as NVNode;
+        if (numPolylines.valueOf() >= 1)
+        {
+            const childName = "Polyline # " + numPolylines.valueOf().toString();
+            let undoneLine = activeDoc.system.findNodeByName(childName) as NVNode;
+            parent.transform.removeChild(undoneLine.transform);
+            undoneLine.dispose();
+
+            if (parent.transform.children.length == 0)
+            {
+                let pParent = activeDoc.system.findNodeByName("Polylines") as NVNode; 
+                pParent.transform.removeChild(parent.transform);
+                parent.dispose();
+                console.log("NAVPAN pParent children" + pParent.transform.children.length);
+                if (pParent.transform.children.length == 0)
+                {
+                    let ppParent = activeDoc.root;
+                    ppParent.transform.removeChild(pParent.transform);
+                    pParent.dispose();
+                }
+            }
+        }
     }
 
     protected render() {

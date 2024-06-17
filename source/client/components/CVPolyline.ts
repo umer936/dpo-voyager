@@ -199,11 +199,10 @@ export default class CVPolyline extends CObject3D {
             this.lines = [];
             this.outs.state.setValue(EPolylineState.SetStart);
 
-            // Dispatch custom event after handling undo action
-            console.log("POLY dispatching event");
             const event = new CustomEvent("polyline-added", {
                 detail: {
-                    label: this.ins.label.value  // Include the label in the event detail
+                    label: this.ins.label.value,
+                    numPolylines: this.getNumPolylines()
                 }
             });
             window.dispatchEvent(event);
@@ -248,11 +247,8 @@ export default class CVPolyline extends CObject3D {
 
     handleUndoAction() {
         if (this.getNumPins() > 0) {
-            console.log("Attempting to remove last pin");
             this.popPin();
             if (this.getNumLines() > 0) {
-                console.log("Number of lines is " + this.getNumLines());
-                console.log("Attempting to remove last pin's line");
                 const lastLine = this.popLine();
                 console.log(lastLine);
                 this.object3D.remove(lastLine);
@@ -260,7 +256,14 @@ export default class CVPolyline extends CObject3D {
         } else {
             // If there are no points added yet, remove the last polyline added (if any)
             if (this.getNumPolylines() > 0) {
+                const event = new CustomEvent("polyline-undone", {
+                    detail: {
+                        label: this.polylines[this.getNumPolylines() - 1].label,
+                        numPolylines: this.getNumPolylines()
+                    }
+                });
                 this.removeLastPolyline();
+                window.dispatchEvent(event);
             }
         }
     }
